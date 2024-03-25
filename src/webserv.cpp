@@ -12,6 +12,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include "Parsing.hpp"
 
 #define PORT 8081
 #define TIMEOUT 10000
@@ -23,7 +24,7 @@ int main()
 	struct sockaddr_in address;
 	int addrlen = sizeof(address);
 
-	std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
+	//std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
 
 	if ((server_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
@@ -118,6 +119,14 @@ int main()
 
                 if (accepted_sockets[new_socket].find("\r\n\r\n") != std::string::npos)
                 {
+                    // Parsing p;
+                    // p.parseRequest(accepted_sockets[new_socket]);
+                    // if (p.tryOpenPage(p.getPagePath()))
+                    //     std::cout << "Status Code : 200" << std::endl;
+                    // else
+                    //     std::cout << "Status Code : 404" << std::endl;
+                    // std::cout << p.getPagePath() << std::endl;
+                    std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
                     if (send(new_socket, hello.c_str(), hello.length(), 0) != static_cast<long int>(hello.length()))
                     {
                         std::cerr << "Error Sending : " << std::endl;

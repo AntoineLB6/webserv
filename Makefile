@@ -1,39 +1,45 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Makefile                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/02/21 14:25:46 by aleite-b          #+#    #+#              #
-#    Updated: 2024/03/21 10:38:18 by aleite-b         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
+CC = c++
+
+FLAGS = -Wall -Wextra -Werror -std=c++98
+
+SRCS = src/Parsing.cpp \
+		src/webserv.cpp
+
+INCLUDE = -I inc/
+
+OBJS_BASE = $(SRCS:.cpp=.o)
+OBJ_PATH = obj/
+OBJS = $(addprefix $(OBJ_PATH),$(OBJS_BASE))
 
 NAME = webserv
 
-CC = c++
-FLAGS = -Wall -Wextra -Werror -std=c++98
-RM = rm -f
+all: $(OBJ_PATH) $(NAME)
 
-SOURCES = webserv.cpp
+$(OBJ_PATH) :
+	mkdir -p obj
+	mkdir -p obj/src
 
-OBJECTS = $(SOURCES:.cpp=.o)
+$(NAME): $(OBJS)
+	@echo "\n"
+	@echo "\033[1m\033[32mCompiling webserv..."
+	$(CC) $(FLAGS) $(OBJS) -o $(NAME) $(INCLUDE)
+	@echo "\n\033[1m\033[35mDone !"
 
-.cpp.o:
-	$(CC) $(FLAGS) -I. -c $< -o $@
-
-$(NAME): $(OBJECTS)
-	$(CC) $(FLAGS) $(OBJECTS) -o $(NAME)
-
-all: $(NAME)
-
-re: clean all
+$(OBJ_PATH)%.o: %.cpp
+	@printf "\033[0;33mGenerating webserv objects... %-33.33s\r" $@
+	$(CC) $(FLAGS) $(INCLUDE) -c $< -o $@
 
 clean:
-	$(RM) $(OBJECTS)
+	@echo "\033[1m\033[31m"
+	@echo "\nRemoving binaries..."
+	rm -f $(OBJS)
+	@echo "\033[0m"
 
 fclean: clean
-	$(RM) $(NAME)
+	@echo "\033[1m\033[31m\nDeleting executable..."
+	rm -f $(NAME)
+	@echo "\033[0m"
 
-.PHONY: all clean re fclean
+re: fclean $(NAME)
+
+.PHONY: all clean fclean re
