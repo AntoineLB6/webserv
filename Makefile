@@ -1,44 +1,39 @@
-CC = c++
-
-FLAGS = -Wall -Wextra -Werror -std=c++98
-
-SRCS = src/main.cpp
-
-INCLUDE = -I inc/
-
-OBJS_BASE = $(SRCS:.cpp=.o)
-OBJ_PATH = obj/
-OBJS = $(addprefix $(OBJ_PATH),$(OBJS_BASE))
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/02/21 14:25:46 by aleite-b          #+#    #+#              #
+#    Updated: 2024/03/21 10:38:18 by aleite-b         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
 NAME = webserv
 
-all: $(OBJ_PATH) $(NAME)
+CC = c++
+FLAGS = -Wall -Wextra -Werror -std=c++98
+RM = rm -f
 
-$(OBJ_PATH) :
-	mkdir -p obj
-	mkdir -p obj/src
+SOURCES = webserv.cpp
 
-$(NAME): $(OBJS)
-	@echo "\n"
-	@echo "\033[1m\033[32mCompiling webserv..."
-	$(CC) $(FLAGS) $(OBJS) -o $(NAME) $(INCLUDE)
-	@echo "\n\033[1m\033[35mDone !"
+OBJECTS = $(SOURCES:.cpp=.o)
 
-$(OBJ_PATH)%.o: %.cpp
-	@printf "\033[0;33mGenerating webserv objects... %-33.33s\r" $@
-	$(CC) $(FLAGS) $(INCLUDE) -c $< -o $@
+.cpp.o:
+	$(CC) $(FLAGS) -I. -c $< -o $@
+
+$(NAME): $(OBJECTS)
+	$(CC) $(FLAGS) $(OBJECTS) -o $(NAME)
+
+all: $(NAME)
+
+re: clean all
 
 clean:
-	@echo "\033[1m\033[31m"
-	@echo "\nRemoving binaries..."
-	rm -f $(OBJS)
-	@echo "\033[0m"
+	$(RM) $(OBJECTS)
 
 fclean: clean
-	@echo "\033[1m\033[31m\nDeleting executable..."
-	rm -f $(NAME)
-	@echo "\033[0m"
+	$(RM) $(NAME)
 
-re: fclean $(NAME)
-
-.PHONY: all clean fclean re
+.PHONY: all clean re fclean
