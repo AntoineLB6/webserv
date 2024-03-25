@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/25 18:42:48 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/25 20:18:18 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,13 +32,20 @@ void Parsing::parseRequest(std::string request)
 	size_t pos = request.find("Referer");
 	if (pos != std::string::npos)
 	{
+		int i = 0;
 		int count = 0;
-		while (count != 3)
+		request = strstr(request.c_str(), "Referer");
+		while (request[i] && count != 3)
 		{
-			request = strstr(request.c_str(), "/");
-			count++;
+			if (request[i] && request[i] == '/')
+				count++;
+			i++;
 		}
-		pagePath = strtok((char *)request.c_str(), "\n");
+		int end = i;
+		while (request[end] != '\r')
+			end++;
+		pagePath = request.substr(i, end);
+		// pagePath = strtok((char *)request.c_str(), "\r\n");
 		printf("Page path : [%s]\n", pagePath.c_str());
 	}
 	else
