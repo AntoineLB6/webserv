@@ -1,21 +1,17 @@
 #include <string>
-
+#include <time.h>
 
 class Sockets
 {
 	private:
-		int fd;
+		const int fd;
 		std::string request;
-		int time;
+		clock_t time;
+		Sockets();
+
 	public:
-		Sockets(/* args */);
+		Sockets(int fd);
 		~Sockets();
+		Sockets(const Sockets &cpySocket);
+		Sockets &operator=(const Sockets &cpySocket);
 };
-
-Sockets::Sockets(/* args */)
-{
-}
-
-Sockets::~Sockets()
-{
-}
