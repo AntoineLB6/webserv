@@ -72,7 +72,7 @@ int main()
     }
 
     struct epoll_event event;
-    event.events = EPOLLIN; // add write aussi
+    event.events = EPOLLIN | EPOLLOUT; // add write aussi
     event.data.fd = server_fd;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, server_fd, &event) == -1)
     {
@@ -137,17 +137,20 @@ int main()
                     }
                     accepted_sockets.insert(std::make_pair(new_socket, Socket(new_socket)));
                 }
-                char buffer[1024] = {0};
-                valread = read(new_socket, buffer, 1024);
-                if (valread < 1)
+                if (events[i].events & EPOLLIN)
                 {
-                    std::cerr << "Error Reading : " << std::endl;
-                    continue;
+                    char buffer[1024] = {0};
+                    valread = read(new_socket, buffer, 1024);
+                    if (valread < 1)
+                    {
+                        std::cerr << "Error Reading : " << std::endl;
+                        continue;
+                    }
+                    accepted_sockets[new_socket].addToBuffer(buffer);
+                    std::cout << accepted_sockets[new_socket].getBuffer() << " - " << valread << std::endl;
                 }
-                accepted_sockets[new_socket].addToBuffer(buffer);
-                std::cout << accepted_sockets[new_socket].getBuffer() << " - " << valread << std::endl;
-
-                if (accepted_sockets[new_socket].getBuffer().find("\r\n\r\n") != std::string::npos)
+                
+                if (accepted_sockets[new_socket].getBuffer().find("\r\n\r\n") != std::string::npos && (events[i].events & EPOLLOUT))
                 {
                     // Parsing p;
                     // p.parseRequest(accepted_sockets[new_socket]);
