@@ -16,22 +16,17 @@
 #include <fcntl.h>
 #include "../inc/Socket.hpp"
 
-#define PORT 8080
+#define PORT 8081
 #define TIMEOUT 10000
 
-int main()
+int create_socket(struct sockaddr_in *address)
 {
-	int server_fd, new_socket;
-	long valread;
-	struct sockaddr_in address;
-	int addrlen = sizeof(address);
+    int server_fd;
 
-	//std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
-
-	if ((server_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
+    if ((server_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
 		std::cerr << "Error Socket : " << std::strerror(errno) << std::endl;
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 
     // Socket non bloquant sur read
@@ -39,30 +34,44 @@ int main()
     if (flags == -1)
     {
         std::cerr << "Error Getting Socket Flags : " << std::strerror(errno) << std::endl;
-        return 1;
+        exit(EXIT_FAILURE);
     }
     if (fcntl(server_fd, F_SETFL, flags | O_NONBLOCK) == -1)
     {
         std::cerr << "Error Setting Socket Flags : " << std::strerror(errno) << std::endl;
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
-	std::memset(&address, 0, sizeof(address));
-	address.sin_family = htonl(AF_INET);
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
+    std::memset(address, 0, sizeof(*address));
+	address->sin_family = htonl(AF_INET);
+	address->sin_addr.s_addr = INADDR_ANY;
+	address->sin_port = htons(PORT);
 
-	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+	if (bind(server_fd, (struct sockaddr *)address, sizeof(*address)) < 0)
 	{
 		std::cerr << "Error Binding : " << std::strerror(errno) << std::endl;
-		return 1;
+		exit(EXIT_FAILURE);
 	}
 
 	if (listen(server_fd, 100) < 0)
 	{
 		std::cerr << "Error Listening : " << std::strerror(errno) << std::endl;
-		return 1;
+		exit(EXIT_FAILURE);
 	}
+
+    return (server_fd);
+}
+
+
+
+int main()
+{
+	int server_fd, new_socket;
+	long valread;
+	struct sockaddr_in address;
+	int addrlen = sizeof(&address);
+
+    server_fd = create_socket(&address);
 
     int epoll_fd = epoll_create(1);
     if (epoll_fd == -1)
@@ -123,7 +132,7 @@ int main()
         {
             for (int i = 0; i < num_events; ++i)
             {
-                std::cout << "\n+++++++ Waiting for new connection ++++++++\n" << std::endl;
+                std::cout << "\n+++++++ Waiting for new connection ++++++++\n" << accepted_sockets.size() << std::endl;
                 if (accepted_sockets.find(events[i].data.fd) != accepted_sockets.end())
                 {
                     new_socket = events[i].data.fd;
@@ -149,8 +158,7 @@ int main()
                     accepted_sockets[new_socket].addToBuffer(buffer);
                     std::cout << accepted_sockets[new_socket].getBuffer() << " - " << valread << std::endl;
                 }
-                
-                if (accepted_sockets[new_socket].getBuffer().find("\r\n\r\n") != std::string::npos && (events[i].events & EPOLLOUT))
+                if (accepted_sockets[new_socket].getBuffer().find("\r\n\r\n") != std::string::npos)
                 {
                     // Parsing p;
                     // p.parseRequest(accepted_sockets[new_socket]);
