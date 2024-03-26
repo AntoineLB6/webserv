@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/26 20:44:04 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/26 21:25:31 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,17 +154,15 @@ void Response::response(std::string request)
 	_response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
 	setContentType();
 	_response += "Content-Type: " + _contentType + "\n";
-	_response += "Content-Length: 154\n";
 	if (_statusCode != 404)
 	{
 		std::string body = readFile();
-		body.length();
+		ss.clear();
+		std::stringstream ss;
+		ss << body.length();
+		_response += "Content-Length: " + ss.str() + "\n";
 		_response += "\n" + body;
 	}
-	// std::cout << "AAAA" << _response.size() << ": " << _response << "BBB" << std::endl;
-	// _response.append(" " + ss.str());
-	// + " " + ss.str() + " " + _status[_statusCode] + "\n";
-	// std::cout << _status[_statusCode] << std::endl;
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)
