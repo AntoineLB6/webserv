@@ -12,7 +12,9 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "Parsing.hpp"
+#include "../inc/Parsing.hpp"
+#include <fcntl.h>
+#include "../inc/Socket.hpp"
 
 #define PORT 8080
 #define TIMEOUT 10000
@@ -31,6 +33,19 @@ int main()
 		std::cerr << "Error Socket : " << std::strerror(errno) << std::endl;
 		return 1;
 	}
+
+    // Socket non bloquant sur read
+    int flags = fcntl(server_fd, F_GETFL, 0);
+    if (flags == -1)
+    {
+        std::cerr << "Error Getting Socket Flags : " << std::strerror(errno) << std::endl;
+        return 1;
+    }
+    if (fcntl(server_fd, F_SETFL, flags | O_NONBLOCK) == -1)
+    {
+        std::cerr << "Error Setting Socket Flags : " << std::strerror(errno) << std::endl;
+        return 1;
+    }
 
 	std::memset(&address, 0, sizeof(address));
 	address.sin_family = htonl(AF_INET);
@@ -66,7 +81,7 @@ int main()
     }
 
     std::vector<struct epoll_event> events;
-    std::map<int, std::string> accepted_sockets;
+    std::map<int, Socket> accepted_sockets;
     events.resize(20);
 	while (1)
 	{
@@ -88,9 +103,24 @@ int main()
         // }
 
         // timeout
+        clock_t time_now = clock();
+        bool have_timeout = false;
+        for (std::map<int, Socket>::iterator it = accepted_sockets.begin(); it != accepted_sockets.end(); ++it)
+        {
+            time_now = clock();
+            double diff_time = static_cast<double>(time_now - it->second.getTime()) / CLOCKS_PER_SEC;
+            if (diff_time > 5.0)
+            {
+                close(it->first);
+                accepted_sockets.erase(it->first);
+                have_timeout = true;
+            }
+        }
+        if (have_timeout)
+            continue;
 
-        // if (events[0].data.fd == server_fd)
-        // {
+        if (events[0].data.fd == server_fd)
+        {
             for (int i = 0; i < num_events; ++i)
             {
                 std::cout << "\n+++++++ Waiting for new connection ++++++++\n" << std::endl;
@@ -105,7 +135,7 @@ int main()
                         std::cerr << "Error Accepting : " << std::strerror(errno) << std::endl;
                         return 1;
                     }
-                    accepted_sockets[new_socket] = "";
+                    accepted_sockets.insert(std::make_pair(new_socket, Socket(new_socket)));
                 }
                 char buffer[1024] = {0};
                 valread = read(new_socket, buffer, 1024);
@@ -114,10 +144,10 @@ int main()
                     std::cerr << "Error Reading : " << std::endl;
                     continue;
                 }
-                accepted_sockets[new_socket] += buffer;
-                std::cout << accepted_sockets[new_socket] << " - " << valread << std::endl;
+                accepted_sockets[new_socket].addToBuffer(buffer);
+                std::cout << accepted_sockets[new_socket].getBuffer() << " - " << valread << std::endl;
 
-                if (accepted_sockets[new_socket].find("\r\n\r\n") != std::string::npos)
+                if (accepted_sockets[new_socket].getBuffer().find("\r\n\r\n") != std::string::npos)
                 {
                     // Parsing p;
                     // p.parseRequest(accepted_sockets[new_socket]);
@@ -136,7 +166,7 @@ int main()
                     accepted_sockets.erase(new_socket);
                 }
             }
-        // }
+        }
 
 	}
 	return 0;

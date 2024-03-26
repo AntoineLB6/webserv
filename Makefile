@@ -3,6 +3,7 @@ CC = c++
 FLAGS = -Wall -Wextra -Werror -std=c++98
 
 SRCS = src/Parsing.cpp \
+		src/Socket.cpp \
 		src/webserv.cpp
 
 INCLUDE = -I inc/
