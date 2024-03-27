@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/26 21:25:31 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/27 03:14:49 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,9 +89,11 @@ void Response::parseAll(std::string request)
 void Response::checkOpenFile(void)
 {
 	std::ifstream page(("pages" + _path).c_str());
-	std::cout << "pages" + _path << std::endl;
 	if (page.good())
+	{
 		setStatusCode(200);
+		page.close();
+	}
 	else
 		setStatusCode(404);
 }
@@ -131,18 +133,22 @@ void Response::setContentType(void)
 		_contentType = "text/plain";
 }
 
-std::string Response::readFile(void)
+std::string Response::readFile(std::string code)
 {
-	std::ifstream page(("pages" + _path).c_str());
+	std::ifstream page;
+	
+	if (code.empty())
+		page.open(("pages" + _path).c_str());
+	else
+		page.open(("pages" + code).c_str());
 	std::string body;
 	std::string line;
 	if (page.is_open())
 	{
 		while (getline(page, line))
-		{
 			body += line;
-		}
 	}
+	page.close();
 	return (body);
 }
 
@@ -153,15 +159,21 @@ void Response::response(std::string request)
 	ss << _statusCode;
 	_response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
 	setContentType();
-	_response += "Content-Type: " + _contentType + "\n";
 	if (_statusCode != 404)
 	{
-		std::string body = readFile();
+		_response += "Content-Type: " + _contentType + "\n";
+		std::string body = readFile("");
 		ss.clear();
 		std::stringstream ss;
 		ss << body.length();
 		_response += "Content-Length: " + ss.str() + "\n";
 		_response += "\n" + body;
+	}
+	else
+	{
+		_response += "Content-Type: text/html\n";
+		_response += "Content-Length: 95\n";
+		_response += "\n<html>  <head>    <title>404</title>  </head>  <body>    <h1>404 Not Found</h1>  </body></html>";
 	}
 }
 

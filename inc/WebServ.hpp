@@ -18,7 +18,7 @@
 #include "Socket.hpp"
 #include "Response.hpp"
 
-#define PORT 8083
+#define PORT 8080
 #define TIMEOUT 10000
 
 class Socket;

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/26 20:03:45 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/27 02:44:07 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ class Response
 		// Response
 		void checkOpenFile(void) ;
 		void response(std::string request);
-		std::string readFile(void);
+		std::string readFile(std::string code);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);
