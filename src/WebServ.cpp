@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   WebServ.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/03/27 17:58:43 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Response.hpp"
 #include "WebServ.hpp"
+#include "CGIHandler.hpp"
 
-WebServ::WebServ()
+WebServ::WebServ(char *port)
 {
-	this->create_server();
+	this->create_server(port);
 	this->create_epoll();
 }
 
@@ -27,7 +40,7 @@ WebServ &WebServ::operator=(const WebServ &cpyWebServ)
 	return (*this);
 }
 
-void WebServ::create_server()
+void WebServ::create_server(char *port)
 {
 	if ((this->server_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
@@ -48,7 +61,7 @@ void WebServ::create_server()
 	std::memset(&this->address, 0, sizeof(this->address));
 	this->address.sin_family = htonl(AF_INET);
 	this->address.sin_addr.s_addr = INADDR_ANY;
-	this->address.sin_port = htons(PORT);
+	this->address.sin_port = htons(std::atoi(port));
 
 	if (bind(this->server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
 	{
@@ -145,7 +158,13 @@ void WebServ::start_server()
                     Response response;
                     response.parseAll(this->accepted_sockets[this->new_socket].getBuffer());
                     response.checkOpenFile();
-                    response.response(this->accepted_sockets[this->new_socket].getBuffer());
+                    // if (response.getMethod() == "POST")
+                    // {
+                    //     // CGIHandler cgi;
+                        
+                    // }
+                    // else if (response.getMethod() == "GET")
+                        response.response(this->accepted_sockets[this->new_socket].getBuffer());
                     std::cout << "Response:" << std::endl << response.getResponse() << std::endl;
                     // std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
                     std::string hello = response.getResponse();

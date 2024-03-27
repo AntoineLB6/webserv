@@ -35,11 +35,11 @@ class WebServ
 		int new_socket;
 
 	public:
-		WebServ();
+		WebServ(char *port);
 		~WebServ();
 		WebServ(const WebServ &cpyWebServ);
 		WebServ &operator=(const WebServ &cpyWebServ);
-		void create_server();
+		void create_server(char *port);
 		void create_epoll();
 		void start_server();
 };
