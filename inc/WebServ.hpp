@@ -1,7 +1,9 @@
 #pragma once
 
 #include <stdio.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -47,4 +49,5 @@ class WebServ
 		void create_epoll();
 		void start_server();
 		int getServerFd() const;
+		bool is_valid_host(const char* host);
 };

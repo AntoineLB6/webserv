@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/28 16:18:40 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/03/28 17:00:10 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,9 +64,15 @@ void WebServ::create_server(char *port)
         std::cerr << "Error Setting Socket Flags : " << std::strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
     }
+    if (!this->is_valid_host(config.server_name.c_str()) || (config.port < 0 && config.port >= 65535))
+    {
+        std::cerr << "Error in host & server_name params : " << std::strerror(errno) << std::endl;
+        exit(EXIT_FAILURE);
+    }
+    
 	std::memset(&this->address, 0, sizeof(this->address));
 	this->address.sin_family = htonl(AF_INET);
-	this->address.sin_addr.s_addr = INADDR_ANY;
+	this->address.sin_addr.s_addr = inet_addr(config.server_name.c_str());
 	this->address.sin_port = htons(std::atoi(port));
 
 	if (bind(this->server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
@@ -300,4 +306,23 @@ void WebServ::start_server()
 int WebServ::getServerFd() const
 {
 	return (this->server_fd);
+}
+
+bool WebServ::is_valid_host(const char* host)
+{
+    struct addrinfo hints;
+    struct addrinfo* res;
+
+    std::memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int status = getaddrinfo(host, NULL, &hints, &res);
+    if (status != 0) {
+        std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
+        return false;
+    }
+
+    freeaddrinfo(res);
+    return true;
 }
