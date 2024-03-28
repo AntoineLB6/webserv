@@ -51,6 +51,7 @@
 		"numbers": "cpp",
 		"typeinfo": "cpp",
 		"sstream": "cpp",
-		"cinttypes": "cpp"
+		"cinttypes": "cpp",
+		"cerrno": "cpp"
 	}
 }

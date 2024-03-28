@@ -1,10 +1,11 @@
 CC = c++
 
-FLAGS = -Wall -Wextra -Werror -std=c++98
+FLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
 SRCS = src/Response.cpp \
 		src/Socket.cpp \
 		src/WebServ.cpp \
+		src/config.cpp \
 		src/main.cpp
 
 INCLUDE = -I inc/

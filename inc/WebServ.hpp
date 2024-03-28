@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include "Socket.hpp"
 #include "Response.hpp"
+#include "main.hpp"
 
 #define PORT 8080
 #define TIMEOUT 10000
@@ -33,13 +34,17 @@ class WebServ
 		std::vector<struct epoll_event> events;
     	std::map<int, Socket> accepted_sockets;
 		int new_socket;
+		struct WebConfig config;
 
 	public:
 		WebServ(char *port);
+		WebServ(struct WebConfig configToSet);
 		~WebServ();
 		WebServ(const WebServ &cpyWebServ);
 		WebServ &operator=(const WebServ &cpyWebServ);
 		void create_server(char *port);
+		void create_server();
 		void create_epoll();
 		void start_server();
+		int getServerFd() const;
 };
