@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 23:26:10 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 00:28:05 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,12 +62,15 @@ void CGIHandler::setCgiEnv(Request &req)
 		_env[i] = strdup(tmp.c_str());
 	}
 	_argv = (char **)calloc(sizeof(char *), 3);
-	_argv[0] = (char *)strdup(req.getPath().c_str());
-	_argv[1] = (char *)strdup(req.getPath().c_str());
+	// _argv[0] = (char *)strdup(req.getPath().c_str());
+	// _argv[1] = (char *)strdup(req.getPath().c_str());
+	_argv[0] = (char *)strdup("/cgi-bin");
+	_argv[1] = (char *)strdup("/test.php");
 	_argv[2] = NULL;
+	std::cout << "envset" << std::endl;
 }
 
-int CGIHandler::execute(std::string file)
+int CGIHandler::execute(void)
 {
 	if (pipe(pipein) == -1)
 		return (1);
@@ -76,6 +79,7 @@ int CGIHandler::execute(std::string file)
 	int cgiPid = fork();
 	if (cgiPid < 0)
 		return (0);
+	std::cout << "exec" << std::endl;
 	if (!cgiPid)
 	{
 		if (dup2(pipein[0], STDIN_FILENO))
@@ -90,4 +94,7 @@ int CGIHandler::execute(std::string file)
 		std::cout << "Execve failed" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+	if (cgiPid > 0)
+	{}
+	return (0);
 }

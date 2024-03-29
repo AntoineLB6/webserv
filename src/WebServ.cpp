@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 16:46:41 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/29 23:45:48 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,7 +225,7 @@ void WebServ::start_server()
                     
                 // }
                 // else if (response.getMethod() == "GET")
-                    response.response(this->accepted_sockets[this->new_socket].getBuffer());
+                    response.chooseResponse(this->accepted_sockets[this->new_socket].getBuffer());
                 std::cout << "Response:" << std::endl << response.getResponse() << std::endl;
                 // std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
                 std::string hello = response.getResponse();

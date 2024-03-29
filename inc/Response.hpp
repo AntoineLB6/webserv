@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 18:38:58 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 00:16:24 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ class Response
 		std::string _date;
 		std::map<std::string, std::string> _header;
 		size_t _statusCode;
+		int cgiFd[2];
 		std::map<int, std::string> _status;
 	public:
 		Response();
@@ -67,6 +68,7 @@ class Response
 		void checkOpenFile(void) ;
 		void response(std::string request);
 		std::string readFile(std::string code);
+		void chooseResponse(std::string request);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 18:45:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 00:17:07 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -175,10 +175,13 @@ std::string Response::readFile(std::string code)
 void Response::handleCGI(void)
 {
 	std::string path = this->_req.getPath();
-	if (path.find("/cgi-bin"))
-		path.erase(0, 1);
+	// if (path.find("/cgi-bin"))
+	// 	path.erase(0, 1);
 	_cgi.setCgiPath(path);
+	if (pipe(cgiFd) < 0)
+		return ;
 	_cgi.setCgiEnv(_req);
+	_cgi.execute();
 }
 
 void Response::response(std::string request)
@@ -213,6 +216,16 @@ void Response::response(std::string request)
 		_response += "Date: " + _date + "\n";
 		_response += "\n" + body;
 	}
+}
+
+void Response::chooseResponse(std::string request)
+{
+	if (getPath().find("cgi-bin") != std::string::npos)
+	{
+		handleCGI();
+	}
+	else
+		response(request);
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)

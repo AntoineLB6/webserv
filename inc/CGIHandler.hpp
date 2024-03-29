@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:07:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 23:22:10 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/29 23:47:04 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <map>
 #include "Request.hpp"
 #include <string.h>
+#include <stdlib.h>
 
 class Request;
 
@@ -34,7 +35,7 @@ class CGIHandler
 		CGIHandler(const CGIHandler &other);
 		CGIHandler& operator=(const CGIHandler &other);
 		~CGIHandler();
-		int execute(std::string file);
+		int execute(void);
 		void setCgiEnv(Request &req);
 		void setCgiPath(std::string path);
 };
