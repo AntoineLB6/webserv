@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/28 16:18:40 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/03/29 16:46:41 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include "WebServ.hpp"
 #include "CGIHandler.hpp"
+#include "Request.hpp"
 
 WebServ::WebServ(char *port)
 {
@@ -211,8 +212,12 @@ void WebServ::start_server()
             }
             if ((this->accepted_sockets[this->new_socket].getBuffer().find("\r\n\r\n") != std::string::npos) && (this->events[i].events & EPOLLOUT))
             {
+                Request req(this->accepted_sockets[this->new_socket].getBuffer());
                 Response response;
-                response.parseAll(this->accepted_sockets[this->new_socket].getBuffer());
+                
+                req.printHeaders();
+                
+                response.parseAll(this->accepted_sockets[this->new_socket].getBuffer(), req);
                 response.checkOpenFile();
                 // if (response.getMethod() == "POST")
                 // {

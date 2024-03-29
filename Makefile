@@ -6,7 +6,9 @@ SRCS = src/Response.cpp \
 		src/Socket.cpp \
 		src/WebServ.cpp \
 		src/config.cpp \
-		src/main.cpp
+		src/main.cpp \
+		src/Request.cpp \
+		src/CGIHandler.cpp
 
 INCLUDE = -I inc/
 

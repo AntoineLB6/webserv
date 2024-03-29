@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/27 18:01:55 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/29 18:45:39 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,11 +79,20 @@ void Response::parseVersion(std::string request)
 	_version = request.substr(this->i + 1, j - i - 1);
 }
 
-void Response::parseAll(std::string request)
+void Response::parseAll(std::string request, Request &req)
 {
+	_req = req;
 	parseMethod(request);
 	parsePath(request);
 	parseVersion(request);
+	std::map<std::string, std::string> headers = req.getHeaders();
+	std::map<std::string, std::string>::iterator it;
+	
+	it = headers.find("Connection");
+	if (it != headers.end())
+	{
+		_connection = "Connection: " + it->second + "\n";
+	}
 }
 
 void Response::checkOpenFile(void)
@@ -96,6 +105,17 @@ void Response::checkOpenFile(void)
 	}
 	else
 		setStatusCode(404);
+}
+
+void Response::setDate(void)
+{
+	time_t now = time(0);
+	struct tm tstruct;
+	char buffer[80];
+
+	tstruct = *localtime(&now);
+	strftime(buffer, sizeof(buffer), "%a, %d %b %y, %H:%M:%S %Z", &tstruct);
+	_date = buffer;
 }
 
 void Response::setContentType(void)
@@ -152,6 +172,15 @@ std::string Response::readFile(std::string code)
 	return (body);
 }
 
+void Response::handleCGI(void)
+{
+	std::string path = this->_req.getPath();
+	if (path.find("/cgi-bin"))
+		path.erase(0, 1);
+	_cgi.setCgiPath(path);
+	_cgi.setCgiEnv(_req);
+}
+
 void Response::response(std::string request)
 {
 	(void)request;
@@ -159,6 +188,7 @@ void Response::response(std::string request)
 	ss << _statusCode;
 	_response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
 	setContentType();
+	setDate();
 	if (_statusCode != 404)
 	{
 		_response += "Content-Type: " + _contentType + "\n";
@@ -167,13 +197,21 @@ void Response::response(std::string request)
 		std::stringstream ss;
 		ss << body.length();
 		_response += "Content-Length: " + ss.str() + "\n";
+		_response += _connection;
+		_response += "Date: " + _date + "\n";
+		_response += "Server: Webserv\n";
 		_response += "\n" + body;
 	}
 	else
 	{
 		_response += "Content-Type: text/html\n";
-		_response += "Content-Length: 95\n";
-		_response += "\n<html>  <head>    <title>404</title>  </head>  <body>    <h1>404 Not Found</h1>  </body></html>";
+		std::string body = readFile("/404.html");
+		ss.clear();
+		std::stringstream ss;
+		ss << body.length();
+		_response += "Content-Length: " + ss.str() + "\n";
+		_response += "Date: " + _date + "\n";
+		_response += "\n" + body;
 	}
 }
 
