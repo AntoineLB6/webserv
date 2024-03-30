@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:07:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 23:47:04 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 21:52:57 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@
 #include "Request.hpp"
 #include <string.h>
 #include <stdlib.h>
+#include <sys/wait.h>
+#include <cstdio>
 
 class Request;
 
@@ -28,14 +30,15 @@ class CGIHandler
 		std::map<std::string, std::string> _envMap;
 		std::string _cgiPath;
 		char **_argv;
-		int pipein[2];
-		int pipeout[2];
+		// int pipein[2];
+		// int pipeout[2];
 	public:
 		CGIHandler();
 		CGIHandler(const CGIHandler &other);
 		CGIHandler& operator=(const CGIHandler &other);
 		~CGIHandler();
-		int execute(void);
+		std::string execute(int pip[2], Request &req);
 		void setCgiEnv(Request &req);
 		void setCgiPath(std::string path);
+		void printEnv(void) ;
 };

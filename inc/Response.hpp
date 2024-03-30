@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 00:16:24 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 22:02:02 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@ class Response
 {
 	private:
 		CGIHandler _cgi;
-		Request _req;
 		size_t i;
 		std::string _method;
 		std::string _path;
@@ -56,7 +55,7 @@ class Response
 		void setStatusCode(int statusCode);
 		void setContentType(void);
 		void setDate(void);
-		void handleCGI(void);
+		std::string handleCGI(Request &req);
 
 		// Getters
 		std::string getMethod(void) const ;
@@ -68,7 +67,7 @@ class Response
 		void checkOpenFile(void) ;
 		void response(std::string request);
 		std::string readFile(std::string code);
-		void chooseResponse(std::string request);
+		void chooseResponse(std::string request, Request &req);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);

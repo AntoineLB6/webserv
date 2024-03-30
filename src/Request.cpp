@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 22:44:23 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 16:43:03 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,15 @@ std::string Request::getPort(void) const
 void Request::setPort(void)
 {
 	size_t i = getHeaders()["Host"].find(':');
-	_port = getHeaders()["Host"].substr(i);
+	_port = getHeaders()["Host"].substr(i + 1);
+}
+
+std::string Request::getContentLength(void)
+{
+	std::stringstream ss;
+	ss << getHeaders()["Body"].length();
+	_contentLength = ss.str();
+	return (_contentLength);
 }
 
 void Request::setContentType(void)
@@ -135,10 +143,10 @@ void Request::fillHeaders(void)
 		{
 			tmp = _request.substr(i, pos - i);
 			_headers[tmp] = _request.substr(pos + 2, _request.find_first_of('\r') - i);
-			int h = 0;
-			while (_headers[tmp][h] != '\r')
-				h++;
-			_headers[tmp].erase(h);
+			size_t j = 0;
+			while (_headers[tmp][j] != '\r')
+				j++;
+			_headers[tmp].erase(j);
 			i = _request.find_first_of('\r', i);
 		}
 		else
@@ -158,6 +166,7 @@ void Request::fillHeaders(void)
 void Request::printHeaders(void)
 {
 	std::map<std::string, std::string>::iterator it;
+	std::cout << std::endl << "REQUEST HEADERS: " << std::endl;
 	for (it = _headers.begin(); it != _headers.end(); it++)
 	{
 		std::cout << it->first << ": " << it->second << std::endl;

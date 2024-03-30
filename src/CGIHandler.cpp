@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 00:28:05 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 23:42:27 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,10 @@ void CGIHandler::setCgiPath(std::string path)
 
 void CGIHandler::setCgiEnv(Request &req)
 {
-	this->_envMap["CONTENT_LENGTH"] =  req.getHeaders()["Body"].length();
+	this->_envMap["CONTENT_LENGTH"] = req.getContentLength();
 	this->_envMap["CONTENT_TYPE"] = req.getContentType();
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
-	this->_envMap["SCRIPT_NAME"] = req.getPath();
+	this->_envMap["SCRIPT_FILENAME"] ="cgi-bin/test.php";
 	this->_envMap["SERVER_PORT"] = req.getPort();
 	this->_envMap["REQUEST_METHOD"] = req.getHeaders()["Method"];
 	this->_envMap["SERVER_PROTOCOL"] = req.getHeaders()["Version"];
@@ -51,6 +51,7 @@ void CGIHandler::setCgiEnv(Request &req)
 	this->_envMap["HTTP_ACCEPT_LANGUAGE"] = req.getHeaders()["Accept-Language"];
 	this->_envMap["HTTP_USER_AGENT"] = req.getHeaders()["User-Agent"];
 	this->_envMap["HTTP_REFERER"] = req.getHeaders()["Referer"];
+	this->_envMap["REDIRECT_STATUS"] = "200";
 	_env = (char **)calloc(sizeof(char *), _envMap.size() + 1);
 	if (!_env)
 		return ;
@@ -60,41 +61,67 @@ void CGIHandler::setCgiEnv(Request &req)
 	{
 		std::string tmp = it->first + "=" + it->second;
 		_env[i] = strdup(tmp.c_str());
+		i++;
 	}
-	_argv = (char **)calloc(sizeof(char *), 3);
+	_argv = (char **)calloc(sizeof(char *), 2);
+	if (!_argv)
+		return ;
 	// _argv[0] = (char *)strdup(req.getPath().c_str());
 	// _argv[1] = (char *)strdup(req.getPath().c_str());
-	_argv[0] = (char *)strdup("/cgi-bin");
-	_argv[1] = (char *)strdup("/test.php");
-	_argv[2] = NULL;
-	std::cout << "envset" << std::endl;
+	_argv[0] = (char *)strdup("/usr/bin/php-cgi");
+	_argv[1] = NULL;
+	// for (int i = 0; i < 3; i++)
+		// std::cout << _argv[i] << std::endl;
+	printEnv();
 }
 
-int CGIHandler::execute(void)
+std::string CGIHandler::execute(int pip[2], Request &req)
 {
-	if (pipe(pipein) == -1)
-		return (1);
-	if (pipe(pipeout) == -1)
-		return (1);
-	int cgiPid = fork();
-	if (cgiPid < 0)
-		return (0);
-	std::cout << "exec" << std::endl;
-	if (!cgiPid)
+	std::string responseBody;
+	int fdout[2];
+	int fdin[2];
+	
+	pipe(fdin);
+	pipe(fdout);
+	(void)pip;
+	
+	pid_t pid = fork();
+	if (pid == 0)
 	{
-		if (dup2(pipein[0], STDIN_FILENO))
-			return (1);
-		if (dup2(pipeout[1], STDOUT_FILENO))
-			return (1);
-		close(pipein[0]);
-		close(pipein[1]);
-		close(pipeout[0]);
-		close(pipeout[1]);
+		dup2(fdout[1], STDOUT_FILENO);
+		close(fdout[0]);
+		close(fdout[1]);
+		dup2(fdin[0], STDIN_FILENO);
+		close(fdin[1]);
+		close(fdin[0]);
 		execve(_argv[0], _argv, _env);
-		std::cout << "Execve failed" << std::endl;
-		exit(EXIT_FAILURE);
 	}
-	if (cgiPid > 0)
-	{}
-	return (0);
+	else
+	{
+		close(fdin[0]);
+		write(fdin[1], req.getHeaders()["Body"].c_str(), req.getHeaders()["Body"].size());
+		close(fdin[1]);
+		close(fdout[1]);
+		int status;
+		waitpid(pid, &status, 0);
+		char buffer[1024];
+		int ret = 0;
+		do {
+			memset(buffer, 0, 1024);
+			ret = read(fdout[0], buffer, 1024);
+			responseBody.append(buffer, ret);
+		} while (ret > 0);
+		close(fdout[0]);
+	}
+	return (responseBody);
+}
+
+void CGIHandler::printEnv(void)
+{
+	int i = 0;
+	
+	while (_env[i])
+	{
+		std::cout << _env[i++] << std::endl;
+	}
 }

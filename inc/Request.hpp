@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:17 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 22:44:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 16:02:46 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include <iostream>
 #include <map>
 #include <iterator>
+#include <sstream>
+#include "Colors.hpp"
 
 class Request
 {
@@ -23,6 +25,7 @@ class Request
 		std::string _request;
 		std::string _contentType;
 		std::string _port;
+		std::string _contentLength;
 	public:
 		Request();
 		Request(std::string request);
@@ -39,4 +42,5 @@ class Request
 		std::string getMethod(void) const ;
 		std::string getContentType(void) const ;
 		std::string getPort(void) const ;
+		std::string getContentLength(void) ;
 };

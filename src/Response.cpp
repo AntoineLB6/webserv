@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 00:17:07 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 23:37:20 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,6 @@ void Response::parseVersion(std::string request)
 
 void Response::parseAll(std::string request, Request &req)
 {
-	_req = req;
 	parseMethod(request);
 	parsePath(request);
 	parseVersion(request);
@@ -172,16 +171,12 @@ std::string Response::readFile(std::string code)
 	return (body);
 }
 
-void Response::handleCGI(void)
+std::string Response::handleCGI(Request &req)
 {
-	std::string path = this->_req.getPath();
-	// if (path.find("/cgi-bin"))
-	// 	path.erase(0, 1);
+	std::string path = req.getPath();
 	_cgi.setCgiPath(path);
-	if (pipe(cgiFd) < 0)
-		return ;
-	_cgi.setCgiEnv(_req);
-	_cgi.execute();
+	_cgi.setCgiEnv(req);
+	return (_cgi.execute(cgiFd, req));
 }
 
 void Response::response(std::string request)
@@ -218,11 +213,22 @@ void Response::response(std::string request)
 	}
 }
 
-void Response::chooseResponse(std::string request)
+void Response::chooseResponse(std::string request, Request &req)
 {
 	if (getPath().find("cgi-bin") != std::string::npos)
 	{
-		handleCGI();
+		std::string body = handleCGI(req);
+		std::stringstream ss;
+		std::stringstream ss_length;
+		ss_length << body.length();
+		ss << 200;
+		_response = getVersion()  + " " + ss.str() + " " + _status[200] + "\n";
+		setDate();
+		ss << body.length();
+		_response += "Content-Length: " + ss_length.str() + "\n";
+		_response += "Date: " + _date + "\n";
+		_response += body;
+		// _response += "Content-type: text/html; charset=UTF-8\r\n\r\nArray\n(\n\t[fname] => Louis\n\t[lname] => M\n)";
 	}
 	else
 		response(request);

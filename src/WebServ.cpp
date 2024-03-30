@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/29 23:45:48 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/30 16:05:10 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,14 +219,8 @@ void WebServ::start_server()
                 
                 response.parseAll(this->accepted_sockets[this->new_socket].getBuffer(), req);
                 response.checkOpenFile();
-                // if (response.getMethod() == "POST")
-                // {
-                //     // CGIHandler cgi;
-                    
-                // }
-                // else if (response.getMethod() == "GET")
-                    response.chooseResponse(this->accepted_sockets[this->new_socket].getBuffer());
-                std::cout << "Response:" << std::endl << response.getResponse() << std::endl;
+                response.chooseResponse(this->accepted_sockets[this->new_socket].getBuffer(), req);
+                std::cout << std::endl << std::endl << "RESPONSE:" << std::endl << response.getResponse() << std::endl;
                 // std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
                 std::string hello = response.getResponse();
                 if (send(this->new_socket, hello.c_str(), hello.length(), 0) != static_cast<long int>(hello.length()))
