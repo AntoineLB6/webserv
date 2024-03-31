@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 23:37:20 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/31 16:38:10 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -176,7 +176,7 @@ std::string Response::handleCGI(Request &req)
 	std::string path = req.getPath();
 	_cgi.setCgiPath(path);
 	_cgi.setCgiEnv(req);
-	return (_cgi.execute(cgiFd, req));
+	return (_cgi.execute(req));
 }
 
 void Response::response(std::string request)
