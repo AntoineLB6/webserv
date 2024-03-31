@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/31 16:38:10 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/03/31 17:06:54 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,7 +228,6 @@ void Response::chooseResponse(std::string request, Request &req)
 		_response += "Content-Length: " + ss_length.str() + "\n";
 		_response += "Date: " + _date + "\n";
 		_response += body;
-		// _response += "Content-type: text/html; charset=UTF-8\r\n\r\nArray\n(\n\t[fname] => Louis\n\t[lname] => M\n)";
 	}
 	else
 		response(request);
