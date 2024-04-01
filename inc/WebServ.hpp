@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   WebServ.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/01 16:05:06 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include <stdio.h>
@@ -47,4 +59,10 @@ class WebServ
 		void create_epoll();
 		void start_server();
 		int getServerFd() const;
+		void handleGET(Request &req);
+		void handlePOST(Request &req);
+		void handleDELETE(Request &req);
+		void handleForm();
+		void handleFileUploads();
+		void handleCGI();
 };

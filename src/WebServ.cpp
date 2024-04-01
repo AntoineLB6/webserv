@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 16:05:10 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/01 16:37:33 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -213,14 +213,25 @@ void WebServ::start_server()
             if ((this->accepted_sockets[this->new_socket].getBuffer().find("\r\n\r\n") != std::string::npos) && (this->events[i].events & EPOLLOUT))
             {
                 Request req(this->accepted_sockets[this->new_socket].getBuffer());
-                Response response;
-                
+                if (req.getMethod() == "GET")
+                {
+                    handleGET(req);
+                }
+                else if (req.getMethod() == "POST")
+                    handlePOST(req);
+                else if (req.getMethod() == "DELETE")
+                    handleDELETE(req);
+                else
+                {
+                    std::cerr << "Wrong method" << std::endl;
+                    return ;
+                }
                 req.printHeaders();
                 
-                response.parseAll(this->accepted_sockets[this->new_socket].getBuffer(), req);
-                response.checkOpenFile();
-                response.chooseResponse(this->accepted_sockets[this->new_socket].getBuffer(), req);
-                std::cout << std::endl << std::endl << "RESPONSE:" << std::endl << response.getResponse() << std::endl;
+                // response.parseAll(this->accepted_sockets[this->new_socket].getBuffer(), req);
+                // response.checkOpenFile();
+                // response.chooseResponse(this->accepted_sockets[this->new_socket].getBuffer(), req);
+                // std::cout << std::endl << std::endl << "RESPONSE:" << std::endl << response.getResponse() << std::endl;
                 // std::string hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 17\n\nHello from server\n";
                 std::string hello = response.getResponse();
                 if (send(this->new_socket, hello.c_str(), hello.length(), 0) != static_cast<long int>(hello.length()))
@@ -236,7 +247,7 @@ void WebServ::start_server()
                 close(this->new_socket);
             }
         }
-
+        
 
         // if (this->events[0].data.fd == this->server_fd)
         // {
@@ -294,6 +305,46 @@ void WebServ::start_server()
         //     }
         // }
 	}
+}
+
+void WebServ::handleGET(Request &req)
+{
+    Response response;
+    // check location
+    
+    if (response.getPath().find("cgi-bin") != std::string::npos)
+    {
+        handleCGI();
+        return ;
+    }
+    response.parseAll(req.getRequest(), req);
+    response.checkOpenFile();
+    
+}
+
+void WebServ::handlePOST(Request &req)
+{
+
+}
+
+void WebServ::handleDELETE(Request &req)
+{
+    
+}
+
+void WebServ::handleForm(void)
+{
+    
+}
+
+void WebServ::handleFileUploads(void)
+{
+    
+}
+
+void WebServ::handleCGI(void)
+{
+
 }
 
 int WebServ::getServerFd() const

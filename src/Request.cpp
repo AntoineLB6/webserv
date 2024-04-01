@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 16:43:03 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/01 16:07:17 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,11 @@ std::string Request::getContentType(void) const
 std::string Request::getPort(void) const
 {
 	return (_port);
+}
+
+std::string Request::getRequest(void) const
+{
+	return (_request);
 }
 
 void Request::setPort(void)
