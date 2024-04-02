@@ -1,11 +1,11 @@
 #include "Socket.hpp"
 
-Socket::Socket(): fd(-1), buffer("")
+Socket::Socket(): fd(-1), server_fd(-1), buffer("")
 {
 	time = clock();
 }
 
-Socket::Socket(int fd): fd(fd), buffer("")
+Socket::Socket(int fd, int server_fd): fd(fd), server_fd(server_fd), buffer("")
 {
 	time = clock();
 }
@@ -15,7 +15,7 @@ Socket::~Socket()
 	
 }
 
-Socket::Socket(const Socket &cpySocket): fd(cpySocket.fd), buffer(cpySocket.buffer), time(cpySocket.time)
+Socket::Socket(const Socket &cpySocket): fd(cpySocket.fd), server_fd(cpySocket.server_fd), buffer(cpySocket.buffer), time(cpySocket.time)
 {
 
 }
@@ -33,6 +33,16 @@ Socket &Socket::operator=(const Socket &cpySocket)
 int Socket::getFd() const
 {
 	return (this->fd);
+}
+
+int Socket::getServerFd() const
+{
+	return (this->server_fd);
+}
+
+int Socket::getBufferSize() const
+{
+	return (this->buffer.size());
 }
 
 std::string Socket::getBuffer() const

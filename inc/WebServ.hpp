@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 15:41:50 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/02 17:40:32 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ class WebServ
 		int getServerFd() const;
 		int getOrCreateSocket();
 		int getEpollFd() const;
+		long getMaxBodySize() const;
 		WebConfig getConfig() const;
 		void setEpollFd(int epoll);
 		void setConfig(WebConfig &config);

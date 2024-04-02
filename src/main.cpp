@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 15:40:21 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/02 17:42:38 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ int	main(int argc, char **argv)
                 if (events[i].data.fd == server->getServerFd()) {
                     server->setEpollFd(epoll_fd);
                     client_fd = server->create_client();
-                    client_fds.insert(std::make_pair(client_fd, Socket(client_fd)));
+                    client_fds.insert(std::make_pair(client_fd, Socket(client_fd, server->getServerFd())));
                     break;
                 }
             }
@@ -109,6 +109,26 @@ int	main(int argc, char **argv)
                     continue;
                 }
                 client_fds[client_fd].addToBuffer(buffer);
+                
+                for (it = servers.begin(); it != servers.end(); it++)
+                {
+                    WebServ* server = *it;
+                    if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                        if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
+                        {
+                            //Send err : "Payload Too Large" (code d'état HTTP 413).
+                            client_fds.erase(client_fd);
+                            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
+                            {
+                                std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                                exit(EXIT_FAILURE);
+                            }
+                            close(client_fd);
+                            continue;
+                        }
+                        break;
+                    }
+                }
                 std::cout << client_fds[client_fd].getBuffer() << " - " << valread << std::endl;
             }
 

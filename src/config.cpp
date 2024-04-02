@@ -75,6 +75,10 @@ std::vector<WebConfig> getConfig(std::string path)
             {
                 put_setting_return(tokens, currentConfig, &config);
             }
+            else if (tokens.size() == 3 && tokens[0] == "error_page")
+            {
+                put_setting_error_page(tokens, currentConfig, &config);
+            }
             else if (tokens.size() >= 2 && tokens[0] == "limit_except")
             {
                 put_setting_http(tokens, currentConfig, &config);
@@ -100,6 +104,7 @@ void defaultRoute(struct RouteConfig *route_config)
 	route_config->limit_except_accepted.clear();
     route_config->limit_except_accepted.push_back("GET");
     route_config->limit_except_accepted.push_back("POST");
+    route_config->limit_except_accepted.push_back("DELETE");
     route_config->return_code = 301;
     route_config->return_redirection = "http://www.google.com/";
     route_config->root = "/var/www/pages/";
@@ -116,6 +121,7 @@ struct WebConfig defaultConfig(struct WebConfig config)
     struct RouteConfig route_config;
     route_config.limit_except_accepted.push_back("GET");
     route_config.limit_except_accepted.push_back("POST");
+    route_config.limit_except_accepted.push_back("DELETE");
     route_config.return_code = 301;
     route_config.return_redirection = "http://www.google.com/";
     route_config.root = "/var/www/pages/";
@@ -258,6 +264,28 @@ void put_setting_http(std::vector<std::string> tokens, std::string currentConfig
             {
                 route->limit_except_accepted.push_back(tokens[i]);
             }
+        }
+        else
+        {
+            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    else
+    {
+        std::cerr << "Error in Config File : " << currentConfig << std::endl;
+        exit(EXIT_FAILURE);
+    }
+}
+
+void put_setting_error_page(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config)
+{
+    std::vector<std::string> config_words = split(currentConfig, ' ');
+    if (config_words[0] != "location")
+    {
+        if (tokens[0] == "error_page")
+        {
+            config->errors_pages.insert(std::make_pair(std::atoi(tokens[1].c_str()), tokens[2]));
         }
         else
         {

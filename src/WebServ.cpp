@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 15:44:14 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/02 17:41:26 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -180,6 +180,11 @@ int WebServ::getServerFd() const
 int WebServ::getEpollFd() const
 {
 	return (this->epoll_fd);
+}
+
+long WebServ::getMaxBodySize() const
+{
+    return (this->config.client_max_body_size);
 }
 
 WebConfig WebServ::getConfig() const
