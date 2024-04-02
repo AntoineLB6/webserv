@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 15:38:53 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/02 15:40:21 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,7 @@ int	main(int argc, char **argv)
             if (client_fds[client_fd].getBuffer().find("\r\n\r\n") != std::string::npos)
             {
                 Response response;
-                response.parseAll(client_fds[client_fd].getBuffer());
+                // response.parseAll(client_fds[client_fd].getBuffer());
                 response.checkOpenFile();
                 response.response(client_fds[client_fd].getBuffer());
                 std::cout << "Response:" << std::endl << response.getResponse() << std::endl;

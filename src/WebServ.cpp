@@ -6,13 +6,14 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 15:35:39 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/02 15:44:14 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include "WebServ.hpp"
 #include "CGIHandler.hpp"
+#include "Request.hpp"
 
 WebServ::WebServ(struct WebConfig& config, int epoll_fd_to_set) : config(config)
 {
@@ -129,6 +130,46 @@ int WebServ::create_client()
         exit(EXIT_FAILURE);
     }
     return client_fd;
+}
+
+// void WebServ::handleGET(Request &req)
+// {
+//     Response response;
+//     // check location
+    
+//     if (response.getPath().find("cgi-bin") != std::string::npos)
+//     {
+//         handleCGI();
+//         return ;
+//     }
+//     response.parseAll(req.getRequest(), req);
+//     response.checkOpenFile();
+    
+// }
+
+// void WebServ::handlePOST(Request &req)
+// {
+    
+// }
+
+// void WebServ::handleDELETE(Request &req)
+// {
+    
+// }
+
+void WebServ::handleForm(void)
+{
+    
+}
+
+void WebServ::handleFileUploads(void)
+{
+    
+}
+
+void WebServ::handleCGI(void)
+{
+
 }
 
 int WebServ::getServerFd() const

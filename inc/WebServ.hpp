@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   WebServ.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/02 15:41:50 by aleite-b         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include <stdio.h>
@@ -54,4 +66,10 @@ class WebServ
 		void setEpollFd(int epoll);
 		void setConfig(WebConfig &config);
 		bool is_valid_host(const char* host);
+		void handleGET(Request &req);
+		void handlePOST(Request &req);
+		void handleDELETE(Request &req);
+		void handleForm();
+		void handleFileUploads();
+		void handleCGI();
 };
