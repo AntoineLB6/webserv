@@ -1,6 +1,6 @@
 #include "../inc/main.hpp"
 
-struct WebConfig getConfig(std::string path)
+std::vector<WebConfig> getConfig(std::string path)
 {
 	std::ifstream file(path.c_str());
 	if (!file)
@@ -10,6 +10,7 @@ struct WebConfig getConfig(std::string path)
 	}
 	std::string line;
 	std::string currentConfig;
+    std::vector<WebConfig> server_configs;
     struct WebConfig config;
     int trigger = 0;
     config = defaultConfig(config);
@@ -25,12 +26,18 @@ struct WebConfig getConfig(std::string path)
 		size_t openBracePos = line.find('{');
 		if (openBracePos != std::string::npos)
 		{
-            if (trigger > 1 || currentConfig == "end")
+			currentConfig = line.substr(0, openBracePos);
+            if (trigger > 1 && currentConfig != "server")
             {
                 std::cerr << "Error in Config File : " << line << std::endl;
                 exit(EXIT_FAILURE);
             }
-			currentConfig = line.substr(0, openBracePos);
+            else if (currentConfig == "server")
+            {
+                struct WebConfig new_config;
+                new_config = defaultConfig(new_config);
+                config = new_config;
+            }
             trigger++;
 			std::cout << "Configuration: " << currentConfig << std::endl;
 		}
@@ -42,7 +49,15 @@ struct WebConfig getConfig(std::string path)
                 exit(EXIT_FAILURE);
             }
             trigger--;
-			(trigger == 1) ? currentConfig = "server" : currentConfig = "end";
+            if (trigger == 1)
+            {
+                currentConfig = "server";
+            }
+            else
+            {
+                currentConfig = "end";
+                server_configs.push_back(config);
+            }
 			continue ;
 		}
 		else
@@ -77,7 +92,7 @@ struct WebConfig getConfig(std::string path)
         exit(EXIT_FAILURE);
     }
 	file.close();
-	return config;
+	return server_configs;
 }
 
 void defaultRoute(struct RouteConfig *route_config)
@@ -96,7 +111,7 @@ void defaultRoute(struct RouteConfig *route_config)
 struct WebConfig defaultConfig(struct WebConfig config)
 {
     config.port = 8080;
-    config.server_name = "test.com";
+    config.server_name = "";
     config.client_max_body_size = 500;
     struct RouteConfig route_config;
     route_config.limit_except_accepted.push_back("GET");

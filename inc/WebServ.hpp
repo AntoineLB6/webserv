@@ -40,14 +40,18 @@ class WebServ
 
 	public:
 		WebServ(char *port);
-		WebServ(struct WebConfig configToSet);
 		~WebServ();
 		WebServ(const WebServ &cpyWebServ);
 		WebServ &operator=(const WebServ &cpyWebServ);
-		void create_server(char *port);
+		WebServ(struct WebConfig& config, int epoll_fd);
 		void create_server();
 		void create_epoll();
-		void start_server();
+		int create_client();
 		int getServerFd() const;
+		int getOrCreateSocket();
+		int getEpollFd() const;
+		WebConfig getConfig() const;
+		void setEpollFd(int epoll);
+		void setConfig(WebConfig &config);
 		bool is_valid_host(const char* host);
 };

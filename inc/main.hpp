@@ -44,4 +44,4 @@ std::vector<std::string> split(const std::string &s, char delimiter);
 void put_setting(std::string key, std::string value, std::string currentConfig, struct WebConfig *config);
 void put_setting_return(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config);
 void put_setting_http(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config);
-struct WebConfig getConfig(std::string path);
+std::vector<WebConfig> getConfig(std::string path);
