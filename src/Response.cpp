@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/03 12:19:30 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/04 15:44:54 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,7 +119,7 @@ void Response::checkOpenFile(std::string path, Request &req)
 {
 	std::ifstream page;
 	
-	std::cout << path << std::endl;
+	// std::cout << path << std::endl;
 	if (path.find("cgi-bin") != std::string::npos)
 	{
 		path.erase(0, 1);
@@ -146,10 +146,10 @@ std::string Response::readFile(std::string code, std::string path)
 {
 	std::ifstream page;
 	
-	std::cout << path << std::endl;
+	// std::cout << path << std::endl;
 	if (path.find("pages/cgi-bin") != std::string::npos)
 		path.erase(0, 6);
-	std::cout << path << std::endl;
+	// std::cout << path << std::endl;
 	if (code == "200")
 		page.open(("pages" + path).c_str());
 	else

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/03 12:34:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/04 15:41:41 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int	main(int argc, char **argv)
     while (true)
     {
         // std::cout << "------------------ Wait -------------------" << num_events << std::endl;
-        num_events = epoll_wait(epoll_fd, events.data(), 20, 10);
+        num_events = epoll_wait(epoll_fd, events.data(), 20, -1);
         if (num_events == -1) {
             std::cerr << "Error in epoll_wait: " << std::strerror(errno) << std::endl;
             return EXIT_FAILURE;
@@ -55,15 +55,22 @@ int	main(int argc, char **argv)
 
         clock_t time_now = clock();
         bool have_timeout = false;
-        for (std::map<int, Socket>::iterator it = client_fds.begin(); it != client_fds.end(); ++it)
+
+        for (std::map<int, Socket>::iterator it = client_fds.begin(); it != client_fds.end(); it++)
         {
             time_now = clock();
             double diff_time = static_cast<double>(time_now - it->second.getTime()) / CLOCKS_PER_SEC;
             if (diff_time > 5.0)
             {
-                close(it->first);
                 client_fds.erase(it->first);
+                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, it->first, NULL) < 0)
+                {
+                    std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                close(it->first);
                 have_timeout = true;
+                break;
             }
         }
         if (have_timeout)
@@ -110,6 +117,10 @@ int	main(int argc, char **argv)
                     continue;
                 }
                 client_fds[client_fd].addToBuffer(buffer);
+
+                // std::cout << "=========================================================" << std::endl;
+                // std::cout << buffer << std::endl;
+                // std::cout << "=========================================================" << std::endl;
                 
                 for (it = servers.begin(); it != servers.end(); it++)
                 {
@@ -125,25 +136,33 @@ int	main(int argc, char **argv)
                                 exit(EXIT_FAILURE);
                             }
                             close(client_fd);
+                            std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
+                            std::cout << "Max body reached" << std::endl;
                             continue;
                         }
                         break;
                     }
                 }
-                std::cout << client_fds[client_fd].getBuffer() << " - " << valread << std::endl;
+                // std::cout << buffer << " - " << valread << std::endl;
+                std::cout << client_fds[client_fd].getBuffer() << std::endl;
+                
             }
-
-            if (client_fds[client_fd].getBuffer().find("\r\n\r\n") != std::string::npos)
+            
+            if (client_fds[client_fd].getBuffer().find("\r\n\r\n") != std::string::npos || client_fds[client_fd].getBuffer().find("\r\r\n") != std::string::npos)
             {
                 Request req(client_fds[client_fd].getBuffer());
                 std::string response;
                 
+                std::cout << "===-----------------===========" << std::endl;
+                std::cout << req.getMethod() << std::endl;
                 if (req.getMethod() == "GET")
                 {
                     response = handleGET(req);
                 }
                 else if (req.getMethod() == "POST")
+                {
                     response = handlePOST(req);
+                }
                 else if (req.getMethod() == "DELETE")
                     response = handleDELETE(req);
                 else
