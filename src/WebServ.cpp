@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/03 17:37:22 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/04 20:07:21 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ std::string handleGET(Request &req)
         }
         
     }
-    response.setHeaders(req);
+    response.setHeaders(req, 0, "");
     return (response.getResponse());
 }
 
@@ -171,7 +171,12 @@ std::string handlePOST(Request &req)
             cgiBody = handleCGI(req, response);
         }
     }
-    response.setHeaders(req);
+    if (req.getPath().find("cgi-bin") != std::string::npos)
+    {
+        response.setHeaders(req, 1, cgiBody);
+    }
+    else
+        response.setHeaders(req, 0, cgiBody);
     if (!cgiBody.empty())
         rep = response.getResponse() + cgiBody;
     else
@@ -179,10 +184,12 @@ std::string handlePOST(Request &req)
     if (response.getStatusCode() == "200")
     {
         std::string contentType = req.getContentType();
-        if (contentType == "application/x-www-form-urlencoded")
-            rep = handleForm(req);
-        if (contentType == "multipart/form-data")
-            rep = handleFileUploads(req);
+        contentType = contentType.substr(0, contentType.find(";"));
+        std::cout << contentType << std::endl;
+        // if (contentType == "application/x-www-form-urlencoded")
+        //     rep = handleForm(req);
+        // if (contentType == "multipart/form-data")
+        //     rep = handleFileUploads(req);
     }
     return (rep); 
 }
@@ -198,6 +205,9 @@ std::string handleDELETE(Request &req)
 std::string handleForm(Request &req)
 {
     (void)req;
+    Response response;
+
+    
     return (NULL);
 }
 

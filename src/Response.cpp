@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 15:44:54 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/04 20:21:05 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,15 +37,24 @@ void Response::setStatusCode(int statusCode)
 	this->_statusCode = statusCode;
 }
 
-void Response::setHeaders(Request &req)
+void Response::setHeaders(Request &req, int flag, std::string cgiBody)
 {
 	checkOpenFile(req.getPath(), req);
 	setVersion(req.getVersion());
-	if (req.getPath().find("cgi-bin") == std::string::npos)
+	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
 		setContentType(req.getContentType());
+	else
+		setContentType("text/html");
 	std::stringstream ss;
 	ss << readFile(getStatusCode(), req.getPath()).length();
-	setContentLength(ss.str());
+	if (!flag)
+		setContentLength(ss.str());
+	else
+	{
+		std::stringstream ss;
+		ss << CGIBodyLength(cgiBody);
+		setContentLength(ss.str());
+	}
 	setDate();
 	setServer("webserv");
 	setConnection("Keep-Alive", req);
@@ -96,6 +105,17 @@ void Response::setConnection(std::string connection, Request &req)
 		this->_response += "Connection: " + connection + "\n";
 }
 
+int Response::CGIBodyLength(std::string cgiBody)
+{
+	int i = 0;
+	while (cgiBody[i] != '\r')
+		i++;
+	if (cgiBody.find("\r") != std::string::npos)
+        return (cgiBody.substr(i + 4, cgiBody.length() - 1).length());
+    else
+        return (cgiBody.length());
+}
+
 void Response::setBody(std::string code, std::string path)
 {
 	std::string body = readFile(code, path);
@@ -119,7 +139,6 @@ void Response::checkOpenFile(std::string path, Request &req)
 {
 	std::ifstream page;
 	
-	// std::cout << path << std::endl;
 	if (path.find("cgi-bin") != std::string::npos)
 	{
 		path.erase(0, 1);
@@ -129,7 +148,6 @@ void Response::checkOpenFile(std::string path, Request &req)
 		page.open(("pages" + path).c_str());
 	if (path.find(".") == std::string::npos && req.getMethod() == "GET")
 	{
-		std::cout << "test" << std::endl;
 		setStatusCode(415);
 		return ;
 	}
@@ -146,10 +164,8 @@ std::string Response::readFile(std::string code, std::string path)
 {
 	std::ifstream page;
 	
-	// std::cout << path << std::endl;
 	if (path.find("pages/cgi-bin") != std::string::npos)
 		path.erase(0, 6);
-	// std::cout << path << std::endl;
 	if (code == "200")
 		page.open(("pages" + path).c_str());
 	else
@@ -171,38 +187,6 @@ std::string Response::handleCGI(Request &req)
 	_cgi.setCgiPath(path);
 	_cgi.setCgiEnv(req);
 	return (_cgi.execute(req));
-}
-
-void Response::response(std::string request)
-{
-	(void)request;
-	// std::stringstream ss;
-	// ss << _statusCode;
-	// _response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
-	// if (_statusCode != 404)
-	// {
-	// 	_response += "Content-Type: " + _contentType + "\n";
-	// 	std::string body = readFile("");
-	// 	ss.clear();
-	// 	std::stringstream ss;
-	// 	ss << body.length();
-	// 	_response += "Content-Length: " + ss.str() + "\n";
-	// 	_response += _connection;
-	// 	_response += "Date: " + _date + "\n";
-	// 	_response += "Server: Webserv\n";
-	// 	_response += "\n" + body;
-	// }
-	// else
-	// {
-	// 	_response += "Content-Type: text/html\n";
-	// 	std::string body = readFile("/404.html");
-	// 	ss.clear();
-	// 	std::stringstream ss;
-	// 	ss << body.length();
-	// 	_response += "Content-Length: " + ss.str() + "\n";
-	// 	_response += "Date: " + _date + "\n";
-	// 	_response += "\n" + body;
-	// }
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)

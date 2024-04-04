@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/03 11:57:56 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/04 18:33:19 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ class Response
 		void setVersion(std::string version);
 		void setContentType(std::string contentType);
 		void setContentLength(std::string contentLength);
-		void setHeaders(Request &req);
+		void setCGIContentLength(std::string path);
+		void setHeaders(Request &req, int flag, std::string cgiBody);
 		void setStatusCode(int statusCode);
 		void setDate(void);
 		void setServer(std::string serverName);
@@ -63,6 +64,7 @@ class Response
 		void checkOpenFile(std::string path, Request &req) ;
 		void response(std::string request);
 		std::string readFile(std::string code, std::string path);
+		int CGIBodyLength(std::string cgiBody);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);

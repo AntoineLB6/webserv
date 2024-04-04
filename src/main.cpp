@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 15:41:41 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/04 20:09:53 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -153,8 +153,6 @@ int	main(int argc, char **argv)
                 Request req(client_fds[client_fd].getBuffer());
                 std::string response;
                 
-                std::cout << "===-----------------===========" << std::endl;
-                std::cout << req.getMethod() << std::endl;
                 if (req.getMethod() == "GET")
                 {
                     response = handleGET(req);
