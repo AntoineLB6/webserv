@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 17:40:32 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/03 18:06:17 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,10 +67,11 @@ class WebServ
 		void setEpollFd(int epoll);
 		void setConfig(WebConfig &config);
 		bool is_valid_host(const char* host);
-		void handleGET(Request &req);
-		void handlePOST(Request &req);
-		void handleDELETE(Request &req);
-		void handleForm();
-		void handleFileUploads();
-		void handleCGI();
 };
+
+std::string handleGET(Request &req);
+std::string handlePOST(Request &req);
+std::string handleDELETE(Request &req);
+std::string handleForm(Request &req);
+std::string handleFileUploads(Request &req);
+std::string handleCGI(Request &req, Response &response);

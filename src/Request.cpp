@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/01 16:07:17 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/03 12:18:57 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,11 @@ std::map<std::string, std::string> Request::getHeaders(void) const
 	return (_headers);
 }
 
+std::string Request::getVersion(void) const
+{
+	return (getHeaders()["Version"]);
+}
+
 std::string Request::getPath(void) const
 {
 	return (getHeaders()["Path"]);
@@ -81,6 +86,7 @@ std::string Request::getContentLength(void)
 	std::stringstream ss;
 	ss << getHeaders()["Body"].length();
 	_contentLength = ss.str();
+
 	return (_contentLength);
 }
 
@@ -115,7 +121,7 @@ void Request::setContentType(void)
 	else if (extension == ".txt")
 		_contentType = "text/plain";
 	else
-		_contentType = "text/plain";
+		_contentType = "text/html";
 }
 
 void Request::readFirstLine(void)

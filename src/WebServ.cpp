@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 17:41:26 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/03 17:37:22 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,44 +132,91 @@ int WebServ::create_client()
     return client_fd;
 }
 
-// void WebServ::handleGET(Request &req)
-// {
-//     Response response;
-//     // check location
-    
-//     if (response.getPath().find("cgi-bin") != std::string::npos)
-//     {
-//         handleCGI();
-//         return ;
-//     }
-//     response.parseAll(req.getRequest(), req);
-//     response.checkOpenFile();
-    
-// }
-
-// void WebServ::handlePOST(Request &req)
-// {
-    
-// }
-
-// void WebServ::handleDELETE(Request &req)
-// {
-    
-// }
-
-void WebServ::handleForm(void)
+std::string handleGET(Request &req)
 {
-    
+    Response response;
+    // location redirect
+    // location errorPages
+    // location allowedMethods
+    // location root
+    // location uri
+    // location index
+    // init un objet location
+    if (req.getPath() != "/")
+    {
+        // check allowed methods => 405
+        if (req.getPath().find("cgi-bin") != std::string::npos)
+        {
+            handleCGI(req, response);
+            return (NULL);
+        }
+        
+    }
+    response.setHeaders(req);
+    return (response.getResponse());
 }
 
-void WebServ::handleFileUploads(void)
+std::string handlePOST(Request &req)
 {
+    Response response;
+    std::string cgiBody = "";
+    std::string rep;
     
+    if (req.getPath() != "/")
+    {
+        // check allowed methods => 405
+        // check max body size => 413
+        if (req.getPath().find("cgi-bin") != std::string::npos)
+        {
+            cgiBody = handleCGI(req, response);
+        }
+    }
+    response.setHeaders(req);
+    if (!cgiBody.empty())
+        rep = response.getResponse() + cgiBody;
+    else
+        rep = response.getResponse();
+    if (response.getStatusCode() == "200")
+    {
+        std::string contentType = req.getContentType();
+        if (contentType == "application/x-www-form-urlencoded")
+            rep = handleForm(req);
+        if (contentType == "multipart/form-data")
+            rep = handleFileUploads(req);
+    }
+    return (rep); 
 }
 
-void WebServ::handleCGI(void)
+std::string handleDELETE(Request &req)
 {
+    Response response;
+    (void)req;
 
+    return (response.getResponse());
+}
+
+std::string handleForm(Request &req)
+{
+    (void)req;
+    return (NULL);
+}
+
+std::string handleFileUploads(Request &req)
+{
+    (void)req;
+    return (NULL);
+}
+
+std::string handleCGI(Request &req, Response &response)
+{
+    std::string body = response.handleCGI(req);
+    
+    if (body.empty())
+    {
+        std::cerr << "Error exec CGI" << std::endl;
+        return (NULL);
+    }
+    return (body);
 }
 
 int WebServ::getServerFd() const

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/31 17:06:54 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/03 12:19:30 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ Response::Response()
 	_status[401] = "Unauthorized";
 	_status[403] = "Forbidden";
 	_status[404] = "Not Found";
+	_status[415] = "Unsupported Media Type";
 }
 
 Response::~Response()
@@ -36,74 +37,37 @@ void Response::setStatusCode(int statusCode)
 	this->_statusCode = statusCode;
 }
 
-std::string Response::getMethod(void) const 
+void Response::setHeaders(Request &req)
 {
-	return (_method);
+	checkOpenFile(req.getPath(), req);
+	setVersion(req.getVersion());
+	if (req.getPath().find("cgi-bin") == std::string::npos)
+		setContentType(req.getContentType());
+	std::stringstream ss;
+	ss << readFile(getStatusCode(), req.getPath()).length();
+	setContentLength(ss.str());
+	setDate();
+	setServer("webserv");
+	setConnection("Keep-Alive", req);
+	if (req.getPath().find("cgi-bin") == std::string::npos)
+		setBody(getStatusCode(), req.getPath());
 }
 
-std::string Response::getPath(void) const 
+void Response::setVersion(std::string version)
 {
-	return (_path);
+	std::stringstream ss;
+	ss << _statusCode;
+	this->_response += version + " " + ss.str() + " " + _status[_statusCode] + "\n";
 }
 
-std::string Response::getVersion(void) const 
+void Response::setContentType(std::string contentType)
 {
-	return (_version);
+	this->_response += "Content-Type: " + contentType + "\n";
 }
 
-std::string Response::getResponse(void) const
+void Response::setContentLength(std::string contentLength)
 {
-	return (_response);
-}
-
-void Response::parseMethod(std::string request)
-{
-	this->i = request.find_first_of(' ');
-	_method = request.substr(0, this->i);
-}
-
-void Response::parsePath(std::string request)
-{
-	size_t j;
-	
-	j = request.find_first_of(' ', this->i + 1);
-	_path = request.substr(i + 1, j - i - 1);
-	this->i = j;
-}
-
-void Response::parseVersion(std::string request)
-{
-	size_t	j;
-
-	j = request.find_first_of('\r', this->i + 1);
-	_version = request.substr(this->i + 1, j - i - 1);
-}
-
-void Response::parseAll(std::string request, Request &req)
-{
-	parseMethod(request);
-	parsePath(request);
-	parseVersion(request);
-	std::map<std::string, std::string> headers = req.getHeaders();
-	std::map<std::string, std::string>::iterator it;
-	
-	it = headers.find("Connection");
-	if (it != headers.end())
-	{
-		_connection = "Connection: " + it->second + "\n";
-	}
-}
-
-void Response::checkOpenFile(void)
-{
-	std::ifstream page(("pages" + _path).c_str());
-	if (page.good())
-	{
-		setStatusCode(200);
-		page.close();
-	}
-	else
-		setStatusCode(404);
+	this->_response += "Content-Length: " + contentLength + "\n";
 }
 
 void Response::setDate(void)
@@ -114,52 +78,82 @@ void Response::setDate(void)
 
 	tstruct = *localtime(&now);
 	strftime(buffer, sizeof(buffer), "%a, %d %b %y, %H:%M:%S %Z", &tstruct);
-	_date = buffer;
+	std::stringstream ss;
+	ss << buffer;
+	_response += "Date: " + ss.str() + "\n";
 }
 
-void Response::setContentType(void)
+void Response::setServer(std::string serverName)
 {
-	size_t j;
-	std::string extension;
-
-	j = getPath().find_last_of('.');
-	if (j != std::string::npos)
-	{
-		size_t i = getPath().find_first_of(' ', j);
-		extension = getPath().substr(j, i - j);
-	}
-	else
-		extension = "";
-	if (extension == ".html")
-		_contentType = "text/html";
-	else if (extension == ".jpg")
-		_contentType = "image/jpeg";
-	else if (extension == ".png")
-		_contentType = "image/png";
-	else if (extension == ".pdf")
-		_contentType = "application/pdf";
-	else if (extension == ".php")
-		_contentType = "application/x-httpd-php";
-	else if (extension == ".js")
-		_contentType = "text/javascript";
-	else if (extension == ".css")
-		_contentType = "text/css";
-	else if (extension == ".bmp")
-		_contentType = "image/bmp";
-	else if (extension == ".txt")
-		_contentType = "text/plain";
-	else
-		_contentType = "text/plain";
+	this->_response += "Server: " + serverName + "\n";
 }
 
-std::string Response::readFile(std::string code)
+void Response::setConnection(std::string connection, Request &req)
+{
+	if (req.getPath().find("cgi-bin") == std::string::npos)
+		this->_response += "Connection: " + connection + "\r\n\r\n";
+	else
+		this->_response += "Connection: " + connection + "\n";
+}
+
+void Response::setBody(std::string code, std::string path)
+{
+	std::string body = readFile(code, path);
+	_response += body;
+}
+
+std::string Response::getResponse(void) const
+{
+	return (_response);
+}
+
+std::string Response::getStatusCode(void) const
+{
+	std::stringstream ss;
+	
+	ss << _statusCode;
+	return (ss.str());
+}
+
+void Response::checkOpenFile(std::string path, Request &req)
 {
 	std::ifstream page;
 	
-	if (code.empty())
-		page.open(("pages" + _path).c_str());
+	std::cout << path << std::endl;
+	if (path.find("cgi-bin") != std::string::npos)
+	{
+		path.erase(0, 1);
+		page.open((path).c_str());
+	}
 	else
-		page.open(("pages" + code).c_str());
+		page.open(("pages" + path).c_str());
+	if (path.find(".") == std::string::npos && req.getMethod() == "GET")
+	{
+		std::cout << "test" << std::endl;
+		setStatusCode(415);
+		return ;
+	}
+	else if (page.good())
+	{
+		setStatusCode(200);
+		page.close();
+	}
+	else
+		setStatusCode(404);
+}
+
+std::string Response::readFile(std::string code, std::string path)
+{
+	std::ifstream page;
+	
+	std::cout << path << std::endl;
+	if (path.find("pages/cgi-bin") != std::string::npos)
+		path.erase(0, 6);
+	std::cout << path << std::endl;
+	if (code == "200")
+		page.open(("pages" + path).c_str());
+	else
+		page.open(("pages/" + code + ".html").c_str());
 	std::string body;
 	std::string line;
 	if (page.is_open())
@@ -182,62 +176,37 @@ std::string Response::handleCGI(Request &req)
 void Response::response(std::string request)
 {
 	(void)request;
-	std::stringstream ss;
-	ss << _statusCode;
-	_response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
-	setContentType();
-	setDate();
-	if (_statusCode != 404)
-	{
-		_response += "Content-Type: " + _contentType + "\n";
-		std::string body = readFile("");
-		ss.clear();
-		std::stringstream ss;
-		ss << body.length();
-		_response += "Content-Length: " + ss.str() + "\n";
-		_response += _connection;
-		_response += "Date: " + _date + "\n";
-		_response += "Server: Webserv\n";
-		_response += "\n" + body;
-	}
-	else
-	{
-		_response += "Content-Type: text/html\n";
-		std::string body = readFile("/404.html");
-		ss.clear();
-		std::stringstream ss;
-		ss << body.length();
-		_response += "Content-Length: " + ss.str() + "\n";
-		_response += "Date: " + _date + "\n";
-		_response += "\n" + body;
-	}
-}
-
-void Response::chooseResponse(std::string request, Request &req)
-{
-	if (getPath().find("cgi-bin") != std::string::npos)
-	{
-		std::string body = handleCGI(req);
-		std::stringstream ss;
-		std::stringstream ss_length;
-		ss_length << body.length();
-		ss << 200;
-		_response = getVersion()  + " " + ss.str() + " " + _status[200] + "\n";
-		setDate();
-		ss << body.length();
-		_response += "Content-Length: " + ss_length.str() + "\n";
-		_response += "Date: " + _date + "\n";
-		_response += body;
-	}
-	else
-		response(request);
+	// std::stringstream ss;
+	// ss << _statusCode;
+	// _response = getVersion()  + " " + ss.str() + " " + _status[_statusCode] + "\n";
+	// if (_statusCode != 404)
+	// {
+	// 	_response += "Content-Type: " + _contentType + "\n";
+	// 	std::string body = readFile("");
+	// 	ss.clear();
+	// 	std::stringstream ss;
+	// 	ss << body.length();
+	// 	_response += "Content-Length: " + ss.str() + "\n";
+	// 	_response += _connection;
+	// 	_response += "Date: " + _date + "\n";
+	// 	_response += "Server: Webserv\n";
+	// 	_response += "\n" + body;
+	// }
+	// else
+	// {
+	// 	_response += "Content-Type: text/html\n";
+	// 	std::string body = readFile("/404.html");
+	// 	ss.clear();
+	// 	std::stringstream ss;
+	// 	ss << body.length();
+	// 	_response += "Content-Length: " + ss.str() + "\n";
+	// 	_response += "Date: " + _date + "\n";
+	// 	_response += "\n" + body;
+	// }
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)
 {
-	os << "Method : " << f.getMethod() << "\n";
-	os << "Path : " << f.getPath() << "\n";
-	os << "Version : " << f.getVersion() << "\n"; 
 	os << "Response : " << f.getResponse();
 	return (os);
 }

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/31 17:30:23 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/02 16:03:59 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,8 @@ void CGIHandler::setCgiEnv(Request &req)
 	// this->_envMap["CONTENT_TYPE"] = req.getContentType();
 	this->_envMap["CONTENT_TYPE"] = "application/x-www-form-urlencoded;charset=utf-8";
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
-	this->_envMap["SCRIPT_FILENAME"] ="cgi-bin/test.php";
+	this->_envMap["SCRIPT_FILENAME"] ="pages/cgi-bin/test.php";
 	this->_envMap["SERVER_PORT"] = req.getPort();
-	this->_envMap["PATH_INFO"] = "fname=Louis&lname=M";
 	this->_envMap["REQUEST_METHOD"] = req.getHeaders()["Method"];
 	this->_envMap["SERVER_PROTOCOL"] = req.getHeaders()["Version"];
 	this->_envMap["HTTP_ACCEPT"] = req.getHeaders()["Accept"];

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/30 22:02:02 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/03 11:57:56 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,11 +30,9 @@ class Response
 		size_t i;
 		std::string _method;
 		std::string _path;
-		std::string _version;
 		std::string _response;
 		std::string _connection;
 		std::string _contentType;
-		std::string _date;
 		std::map<std::string, std::string> _header;
 		size_t _statusCode;
 		int cgiFd[2];
@@ -45,29 +43,26 @@ class Response
 		~Response();
 		Response& operator=(const Response &other);
 		
-		// Parsing First Line
-		void parseMethod(std::string request);
-		void parsePath(std::string request);
-		void parseVersion(std::string request);
-		void parseAll(std::string request, Request &req);
-
-		//Setters
+		// Setters
+		void setVersion(std::string version);
+		void setContentType(std::string contentType);
+		void setContentLength(std::string contentLength);
+		void setHeaders(Request &req);
 		void setStatusCode(int statusCode);
-		void setContentType(void);
 		void setDate(void);
+		void setServer(std::string serverName);
+		void setConnection(std::string connection, Request &req);
+		void setBody(std::string code, std::string path);
 		std::string handleCGI(Request &req);
 
 		// Getters
-		std::string getMethod(void) const ;
-		std::string getPath(void) const ;
-		std::string getVersion(void) const ;
 		std::string getResponse(void) const ;
+		std::string getStatusCode(void) const ;
 
 		// Response
-		void checkOpenFile(void) ;
+		void checkOpenFile(std::string path, Request &req) ;
 		void response(std::string request);
-		std::string readFile(std::string code);
-		void chooseResponse(std::string request, Request &req);
+		std::string readFile(std::string code, std::string path);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:17 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/01 16:07:52 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/02 13:41:57 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,12 +32,19 @@ class Request
 		Request(const Request &other);
 		~Request();
 		Request& operator=(const Request &other);
-		std::map<std::string, std::string> getHeaders(void) const;
+
+		// Parsing
 		void readFirstLine(void);
 		void fillHeaders(void);
 		void printHeaders(void);
+
+		// Setters
 		void setContentType(void);
 		void setPort(void);
+		
+		// Getters
+		std::map<std::string, std::string> getHeaders(void) const;
+		std::string getVersion(void) const ;
 		std::string getPath(void) const ;
 		std::string getMethod(void) const ;
 		std::string getContentType(void) const ;
