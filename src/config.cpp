@@ -56,6 +56,21 @@ std::vector<WebConfig> getConfig(std::string path)
             else
             {
                 currentConfig = "end";
+                if (config.routes.empty())
+                {
+                    struct RouteConfig *route = new RouteConfig;
+                    defaultRoute(route);
+                    config.routes.insert(std::make_pair("/", *route));
+                }
+                else
+                {
+                    for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
+                    {
+                        RouteConfig& route = it->second;
+                        if (route.limit_except_accepted.empty())
+                            route.limit_except_accepted.push_back("GET");
+                    }
+                }
                 server_configs.push_back(config);
             }
 			continue ;
@@ -81,18 +96,19 @@ std::vector<WebConfig> getConfig(std::string path)
             }
             else if (tokens.size() >= 2 && tokens[0] == "limit_except")
             {
+                std::cout << "==" << currentConfig << std::endl;
                 put_setting_http(tokens, currentConfig, &config);
             }
             else
             {
-                std::cerr << "Error in Config File : " << line << std::endl;
+                std::cerr << "Error in Config File1 : " << line << std::endl;
                 exit(EXIT_FAILURE);
             }
 		}
 	}
     if (trigger)
     {
-        std::cerr << "Error in Config File : " << "not closed" << std::endl;
+        std::cerr << "Error in Config File2 : " << "not closed" << std::endl;
         exit(EXIT_FAILURE);
     }
 	file.close();
@@ -101,34 +117,19 @@ std::vector<WebConfig> getConfig(std::string path)
 
 void defaultRoute(struct RouteConfig *route_config)
 {
-	route_config->limit_except_accepted.clear();
-    route_config->limit_except_accepted.push_back("GET");
-    route_config->limit_except_accepted.push_back("POST");
-    route_config->limit_except_accepted.push_back("DELETE");
     route_config->return_code = 301;
     route_config->return_redirection = "http://www.google.com/";
     route_config->root = "/var/www/pages/";
     route_config->autoindex = true;
     route_config->default_page = "index.html";
     route_config->client_body_temp_path = "/var/www/uploads/";
+    route_config->client_max_body_size = 1024;
 }
 
 struct WebConfig defaultConfig(struct WebConfig config)
 {
     config.port = 8080;
     config.server_name = "";
-    config.client_max_body_size = 500;
-    struct RouteConfig route_config;
-    route_config.limit_except_accepted.push_back("GET");
-    route_config.limit_except_accepted.push_back("POST");
-    route_config.limit_except_accepted.push_back("DELETE");
-    route_config.return_code = 301;
-    route_config.return_redirection = "http://www.google.com/";
-    route_config.root = "/var/www/pages/";
-    route_config.autoindex = true;
-    route_config.default_page = "index.html";
-    route_config.client_body_temp_path = "/var/www/uploads/";
-    config.routes.insert(std::make_pair("/", route_config));
     return (config);
 }
 
@@ -166,11 +167,9 @@ void put_setting(std::string key, std::string value, std::string currentConfig, 
             config->port = std::atoi(value.c_str());
         else if (key == "server_name")
             config->server_name = value;
-        else if (key == "client_max_body_size")
-            config->client_max_body_size = std::atol(value.c_str());
         else
         {
-            std::cerr << "Error in Config File : " << key << std::endl;
+            std::cerr << "Error in Config File3 : " << key << std::endl;
             exit(EXIT_FAILURE);
         }
         
@@ -182,6 +181,7 @@ void put_setting(std::string key, std::string value, std::string currentConfig, 
             route = &config->routes.find(config_words[1])->second;
         else
         {
+            route = new RouteConfig;
             defaultRoute(route);
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
@@ -198,15 +198,17 @@ void put_setting(std::string key, std::string value, std::string currentConfig, 
             route->default_page = value;
         else if (key == "client_body_temp_path")
             route->client_body_temp_path = value;
+        else if (key == "client_max_body_size")
+            route->client_max_body_size = std::atol(value.c_str());
         else
         {
-            std::cerr << "Error in Config File : " << key << std::endl;
+            std::cerr << "Error in Config File4 : " << key << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File5 : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -221,6 +223,7 @@ void put_setting_return(std::vector<std::string> tokens, std::string currentConf
             route = &config->routes.find(config_words[1])->second;
         else
         {
+            route = new RouteConfig;
             defaultRoute(route);
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
@@ -232,13 +235,13 @@ void put_setting_return(std::vector<std::string> tokens, std::string currentConf
         }
         else
         {
-            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File6 : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File7 : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -249,31 +252,35 @@ void put_setting_http(std::vector<std::string> tokens, std::string currentConfig
     if (config_words[0] == "location")
     {
         struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) != config->routes.end())
-            route = &config->routes.find(config_words[1])->second;
-        else
+        if (config->routes.find(config_words[1]) == config->routes.end())
         {
+            route = new RouteConfig;
             defaultRoute(route);
+            // config->routes[config_words[1]] = *route;
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
+        route = &config->routes.find(config_words[1])->second;
         
         if (tokens[0] == "limit_except")
         {
-			route->limit_except_accepted.clear();
             for (size_t i = 1; i < tokens.size(); i++)
             {
                 route->limit_except_accepted.push_back(tokens[i]);
             }
+            for (std::vector<std::string>::iterator it = route->limit_except_accepted.begin(); it != route->limit_except_accepted.end(); it++)
+            {
+                std::cout << "\\\\\\\\\\\\\\\\\\" << *it << std::endl;
+            }
         }
         else
         {
-            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File8 : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File9 : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
@@ -289,13 +296,13 @@ void put_setting_error_page(std::vector<std::string> tokens, std::string current
         }
         else
         {
-            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File10 : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File11 : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 03:01:47 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 09:33:34 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -261,10 +261,10 @@ int WebServ::getEpollFd() const
 	return (this->epoll_fd);
 }
 
-long WebServ::getMaxBodySize() const
-{
-    return (this->config.client_max_body_size);
-}
+// long WebServ::getMaxBodySize() const
+// {
+//     return (this->config.client_max_body_size);
+// }
 
 WebConfig WebServ::getConfig() const
 {

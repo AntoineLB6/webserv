@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 02:47:03 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 12:54:29 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,32 @@ int	main(int argc, char **argv)
     }
 
     std::vector<WebConfig> server_configs = getConfig(path);
+
+    int i = 1;
+    for (std::vector<WebConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
+    {
+        std::cout << "Config 1" << std::endl;
+        WebConfig config = *it;
+        for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
+        {
+            RouteConfig route = it->second;
+            std::cout << "==== Chemin : " << it->first << std::endl;
+            std::cout << "Return Code : " << route.return_code << " | " << route.return_redirection << std::endl;
+            std::cout << "Root : " << route.root << std::endl;
+            std::cout << "Autoindex : " << route.autoindex << std::endl;
+            std::cout << "Default Page : " << route.default_page << std::endl;
+            std::cout << "Client body install repo : " << route.client_body_temp_path << std::endl;
+            std::cout << "Max body size : " << route.client_max_body_size << std::endl;
+            std::cout << "Allowed Methods : ";
+            for (std::vector<std::string>::iterator it = route.limit_except_accepted.begin(); it != route.limit_except_accepted.end(); it++)
+            {
+                std::cout << *it;
+            }
+            std::cout << std::endl;
+        }
+        i++;
+    }
+    
 
     int epoll_fd = epoll_create(1);
     if (epoll_fd == -1) {
@@ -122,27 +148,27 @@ int	main(int argc, char **argv)
                 // std::cout << buffer << std::endl;
                 // std::cout << "=========================================================" << std::endl;
                 
-                for (it = servers.begin(); it != servers.end(); it++)
-                {
-                    WebServ* server = *it;
-                    if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
-                        if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
-                        {
-                            //Send err : "Payload Too Large" (code d'état HTTP 413).
-                            client_fds.erase(client_fd);
-                            if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
-                            {
-                                std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
-                                exit(EXIT_FAILURE);
-                            }
-                            close(client_fd);
-                            std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
-                            std::cout << "Max body reached" << std::endl;
-                            continue;
-                        }
-                        break;
-                    }
-                }
+                // for (it = servers.begin(); it != servers.end(); it++)
+                // {
+                //     WebServ* server = *it;
+                //     if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                //         if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
+                //         {
+                //             //Send err : "Payload Too Large" (code d'état HTTP 413).
+                //             client_fds.erase(client_fd);
+                //             if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
+                //             {
+                //                 std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                //                 exit(EXIT_FAILURE);
+                //             }
+                //             close(client_fd);
+                //             std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
+                //             std::cout << "Max body reached" << std::endl;
+                //             continue;
+                //         }
+                //         break;
+                //     }
+                // }
                 // std::cout << buffer << " - " << valread << std::endl;
                 std::cout << client_fds[client_fd].getBuffer() << std::endl;
                 
@@ -153,20 +179,49 @@ int	main(int argc, char **argv)
                 Request req(client_fds[client_fd].getBuffer());
                 std::string response;
                 
-                if (req.getMethod() == "GET")
+                for (it = servers.begin(); it != servers.end(); it++)
                 {
-                    response = handleGET(req);
+                    WebServ* server = *it;
+                    if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                        WebConfig config = server->getConfig();
+                        struct RouteConfig route;
+                        if (config.routes.find(req.getPath()) == config.routes.end())
+                            route = config.routes.find(req.getPath())->second;
+                        else
+                            route = config.routes.find("/")->second;
+                        
+                        if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                        {
+                            response = handleGET(req);
+                        }
+                        else if (req.getMethod() == "POST" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                        {
+                            response = handlePOST(req);
+                        }
+                        else if (req.getMethod() == "DELETE" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                            response = handleDELETE(req);
+                        else
+                        {
+                            response = getErrorsPages("501");
+                        }
+                        config.routes[req.getPath()];
+                        break;
+                    }
                 }
-                else if (req.getMethod() == "POST")
-                {
-                    response = handlePOST(req);
-                }
-                else if (req.getMethod() == "DELETE")
-                    response = handleDELETE(req);
-                else
-                {
-                    response = getErrorsPages("501");
-                }
+                // if (req.getMethod() == "GET")
+                // {
+                //     response = handleGET(req);
+                // }
+                // else if (req.getMethod() == "POST")
+                // {
+                //     response = handlePOST(req);
+                // }
+                // else if (req.getMethod() == "DELETE")
+                //     response = handleDELETE(req);
+                // else
+                // {
+                //     response = getErrorsPages("501");
+                // }
                 req.printHeaders();
                 std::cout << std::endl << std::endl << "Response: \n"<< response << std::endl;
                 std::string hello = response;
