@@ -6,14 +6,14 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 15:11:32 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/05 18:25:51 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include "main.hpp"
 
-Response::Response()
+Response::Response(): _is_dir(false)
 {
 	_status[200] = "OK";
 	_status[201] = "Created";
@@ -41,6 +41,8 @@ void Response::setStatusCode(int statusCode)
 void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
 {
 	checkOpenFile(req.getPath(), req, route);
+	// if (this->_is_dir)
+	// 	this->openDirectory();
 	setVersion(req.getVersion());
 	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
 	{
@@ -140,12 +142,32 @@ std::string Response::getStatusCode(void) const
 	return (ss.str());
 }
 
+bool isDirectory(const std::string& path)
+{
+    struct stat info;
+    if (stat(path.c_str(), &info) != 0) {
+        // La fonction stat a échoué, le chemin n'existe peut-être pas
+        return false;
+    }
+    return S_ISDIR(info.st_mode);
+}
+
+// void Response::openDirectory()
+// {
+// 	setStatusCode(301);
+// }
+
 void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig route)
 {
 	std::ifstream page;
 	
 	path = route.root + path;
 	this->_path = path;
+	// if (isDirectory(this->_path))
+	// {
+	// 	this->_is_dir = true;
+	// 	return ;
+	// }
 	if (path.find("cgi-bin") != std::string::npos)
 	{
 		page.open((path).c_str());

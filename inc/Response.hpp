@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 14:59:10 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/05 18:12:25 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include "CGIHandler.hpp"
 #include "Request.hpp"
+#include <sys/stat.h>
 
 class CGIHandler;
 
@@ -37,6 +38,7 @@ class Response
 		size_t _statusCode;
 		int cgiFd[2];
 		std::map<int, std::string> _status;
+		bool _is_dir;
 	public:
 		Response();
 		Response(const Response &other);
@@ -62,9 +64,11 @@ class Response
 
 		// Response
 		void checkOpenFile(std::string path, Request &req, struct RouteConfig route) ;
+		void openDirectory();
 		void response(std::string request);
 		std::string readFile(std::string code, std::string path);
 		int CGIBodyLength(std::string cgiBody);
 };
 
 std::ostream& operator<<(std::ostream &os, Response const &f);
+bool isDirectory(const std::string& path);
