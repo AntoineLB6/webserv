@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 16:03:59 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 00:28:20 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void CGIHandler::setCgiEnv(Request &req)
 	// _argv[1] = (char *)strdup(req.getPath().c_str());
 	// _argv[0] = (char *)strdup("/usr/bin/php-cgi");
 	_argv[0] = (char *)strdup("/usr/bin/php-cgi");
-	_argv[1] = (char *)strdup("cgi-bin/test.php");
+	_argv[1] = (char *)strdup("pages/cgi-bin/test.php");
 	_argv[2] = NULL;
 	// for (int i = 0; i < 3; i++)
 		// std::cout << _argv[i] << std::endl;

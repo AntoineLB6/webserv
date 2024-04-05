@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 20:15:18 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 00:47:00 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ std::string Request::getContentType(void) const
 	std::map<std::string, std::string> map = getHeaders();
 
 	it = map.find("Content-Type");
-	if (it != map.end())
+	if (it != map.end() && it->second.find("form") == std::string::npos)
 	{
 		return (map["Content-Type"]);
 	}

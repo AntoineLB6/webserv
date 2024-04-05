@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 18:22:26 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 02:43:35 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,3 +75,5 @@ std::string handleDELETE(Request &req);
 std::string handleForm(Request &req);
 std::string handleFileUploads(Request &req);
 std::string handleCGI(Request &req, Response &response);
+std::string readFile(std::string code);
+std::string getErrorsPages(std::string code);

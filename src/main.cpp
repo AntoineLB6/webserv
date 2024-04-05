@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 20:09:53 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 02:47:03 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -165,8 +165,7 @@ int	main(int argc, char **argv)
                     response = handleDELETE(req);
                 else
                 {
-                    std::cerr << "Wrong method" << std::endl;
-                    return (1);
+                    response = getErrorsPages("501");
                 }
                 req.printHeaders();
                 std::cout << std::endl << std::endl << "Response: \n"<< response << std::endl;

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 20:07:21 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 03:01:47 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -228,6 +228,28 @@ std::string handleCGI(Request &req, Response &response)
     }
     return (body);
 }
+
+std::string getErrorsPages(std::string code)
+{
+    std::ifstream page;
+
+    page.open(("pages/" + code + ".html").c_str());
+    std::string body;
+	std::string line;
+    
+    if (page.good())
+    {
+		while (getline(page, line))
+			body += line;
+	}
+    std::stringstream ss;
+    ss << body.length();
+    std::string rep = "HTTP/1.1 501 Internal Server Error\nContent-Type: text/html\nContent-Length: " + ss.str() + "\nServer: webserv\n\n";
+    rep += body;
+	page.close();
+    return (rep);
+}
+
 
 int WebServ::getServerFd() const
 {

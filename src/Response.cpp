@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/04 20:21:05 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 02:38:03 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,10 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody)
 	checkOpenFile(req.getPath(), req);
 	setVersion(req.getVersion());
 	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
+	{
+		std::cout << "ERGREGREGERGER" << std::endl;
 		setContentType(req.getContentType());
+	}
 	else
 		setContentType("text/html");
 	std::stringstream ss;
@@ -139,13 +142,13 @@ void Response::checkOpenFile(std::string path, Request &req)
 {
 	std::ifstream page;
 	
+	path.erase(0, 1);
 	if (path.find("cgi-bin") != std::string::npos)
 	{
-		path.erase(0, 1);
 		page.open((path).c_str());
 	}
 	else
-		page.open(("pages" + path).c_str());
+		page.open((path).c_str());
 	if (path.find(".") == std::string::npos && req.getMethod() == "GET")
 	{
 		setStatusCode(415);
@@ -164,10 +167,9 @@ std::string Response::readFile(std::string code, std::string path)
 {
 	std::ifstream page;
 	
-	if (path.find("pages/cgi-bin") != std::string::npos)
-		path.erase(0, 6);
+	path.erase(0, 1);
 	if (code == "200")
-		page.open(("pages" + path).c_str());
+		page.open((path).c_str());
 	else
 		page.open(("pages/" + code + ".html").c_str());
 	std::string body;
