@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 13:22:33 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 15:02:04 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,7 +132,7 @@ int WebServ::create_client()
     return client_fd;
 }
 
-std::string handleGET(Request &req)
+std::string handleGET(Request &req, struct RouteConfig route)
 {
     Response response;
     // location redirect
@@ -152,11 +152,11 @@ std::string handleGET(Request &req)
         }
         
     }
-    response.setHeaders(req, 0, "");
+    response.setHeaders(req, 0, "", route);
     return (response.getResponse());
 }
 
-std::string handlePOST(Request &req)
+std::string handlePOST(Request &req, struct RouteConfig route)
 {
     Response response;
     std::string cgiBody = "";
@@ -173,10 +173,10 @@ std::string handlePOST(Request &req)
     }
     if (req.getPath().find("cgi-bin") != std::string::npos)
     {
-        response.setHeaders(req, 1, cgiBody);
+        response.setHeaders(req, 1, cgiBody, route);
     }
     else
-        response.setHeaders(req, 0, cgiBody);
+        response.setHeaders(req, 0, cgiBody, route);
     if (!cgiBody.empty())
         rep = response.getResponse() + cgiBody;
     else
@@ -194,10 +194,11 @@ std::string handlePOST(Request &req)
     return (rep); 
 }
 
-std::string handleDELETE(Request &req)
+std::string handleDELETE(Request &req, struct RouteConfig route)
 {
     Response response;
     (void)req;
+    (void)route;
 
     return (response.getResponse());
 }

@@ -119,7 +119,7 @@ void defaultRoute(struct RouteConfig *route_config)
 {
     route_config->return_code = 301;
     route_config->return_redirection = "http://www.google.com/";
-    route_config->root = "/var/www/pages/";
+    route_config->root = "./pages";
     route_config->autoindex = true;
     route_config->default_page = "index.html";
     route_config->client_body_temp_path = "/var/www/uploads/";

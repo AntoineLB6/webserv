@@ -3,14 +3,15 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 02:38:03 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 15:11:32 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
+#include "main.hpp"
 
 Response::Response()
 {
@@ -37,9 +38,9 @@ void Response::setStatusCode(int statusCode)
 	this->_statusCode = statusCode;
 }
 
-void Response::setHeaders(Request &req, int flag, std::string cgiBody)
+void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
 {
-	checkOpenFile(req.getPath(), req);
+	checkOpenFile(req.getPath(), req, route);
 	setVersion(req.getVersion());
 	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
 	{
@@ -49,7 +50,7 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody)
 	else
 		setContentType("text/html");
 	std::stringstream ss;
-	ss << readFile(getStatusCode(), req.getPath()).length();
+	ss << readFile(getStatusCode(), _path).length();
 	if (!flag)
 		setContentLength(ss.str());
 	else
@@ -62,7 +63,7 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody)
 	setServer("webserv");
 	setConnection("Keep-Alive", req);
 	if (req.getPath().find("cgi-bin") == std::string::npos)
-		setBody(getStatusCode(), req.getPath());
+		setBody(getStatusCode(), _path);
 }
 
 void Response::setVersion(std::string version)
@@ -121,6 +122,7 @@ int Response::CGIBodyLength(std::string cgiBody)
 
 void Response::setBody(std::string code, std::string path)
 {
+	std::cout << path << "================" << std::endl;
 	std::string body = readFile(code, path);
 	_response += body;
 }
@@ -138,11 +140,12 @@ std::string Response::getStatusCode(void) const
 	return (ss.str());
 }
 
-void Response::checkOpenFile(std::string path, Request &req)
+void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig route)
 {
 	std::ifstream page;
 	
-	path.erase(0, 1);
+	path = route.root + path;
+	this->_path = path;
 	if (path.find("cgi-bin") != std::string::npos)
 	{
 		page.open((path).c_str());
@@ -167,7 +170,8 @@ std::string Response::readFile(std::string code, std::string path)
 {
 	std::ifstream page;
 	
-	path.erase(0, 1);
+	// path.erase(0, 1);
+	std::cout << path << std::endl;
 	if (code == "200")
 		page.open((path).c_str());
 	else

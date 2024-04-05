@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 02:43:35 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/05 14:55:35 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,9 +69,9 @@ class WebServ
 		bool is_valid_host(const char* host);
 };
 
-std::string handleGET(Request &req);
-std::string handlePOST(Request &req);
-std::string handleDELETE(Request &req);
+std::string handleGET(Request &req, struct RouteConfig route);
+std::string handlePOST(Request &req, struct RouteConfig route);
+std::string handleDELETE(Request &req, struct RouteConfig route);
 std::string handleForm(Request &req);
 std::string handleFileUploads(Request &req);
 std::string handleCGI(Request &req, Response &response);
