@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 12:54:29 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/05 13:40:44 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,20 +185,26 @@ int	main(int argc, char **argv)
                     if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
                         WebConfig config = server->getConfig();
                         struct RouteConfig route;
-                        if (config.routes.find(req.getPath()) == config.routes.end())
-                            route = config.routes.find(req.getPath())->second;
-                        else
-                            route = config.routes.find("/")->second;
                         
-                        if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                        if (config.routes.find(req.getPath()) != config.routes.end())
+                        {
+                            route = config.routes.find(req.getPath())->second;
+                        }
+                        else
+                        {
+                            route = config.routes.find("/")->second;
+                        }
+                        std::cout << req.getMethod() << std::endl;
+                        
+                        if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                         {
                             response = handleGET(req);
                         }
-                        else if (req.getMethod() == "POST" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                        else if (req.getMethod() == "POST" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                         {
                             response = handlePOST(req);
                         }
-                        else if (req.getMethod() == "DELETE" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) == route.limit_except_accepted.end()))
+                        else if (req.getMethod() == "DELETE" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                             response = handleDELETE(req);
                         else
                         {

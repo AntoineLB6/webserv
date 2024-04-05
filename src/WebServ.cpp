@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 09:33:34 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/05 13:22:33 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -246,10 +246,9 @@ std::string getErrorsPages(std::string code)
     ss << body.length();
     std::string rep = "HTTP/1.1 501 Internal Server Error\nContent-Type: text/html\nContent-Length: " + ss.str() + "\nServer: webserv\n\n";
     rep += body;
-	page.close();
+    page.close();
     return (rep);
 }
-
 
 int WebServ::getServerFd() const
 {
