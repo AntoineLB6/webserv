@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
@@ -10,12 +12,14 @@
 #include <cerrno>
 #include <sys/epoll.h>
 #include <vector>
+#include <sys/stat.h>
+#include <dirent.h>
 #include <map>
 #include <algorithm>
 #include <fcntl.h>
 #include "Socket.hpp"
 #include "Response.hpp"
-
+#include "AutoIndex.hpp"
 
 struct RouteConfig
 {

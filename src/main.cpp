@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 18:06:05 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 15:51:12 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,7 +242,7 @@ int	main(int argc, char **argv)
                     // {
                     //     response = getErrorsPages("501");
                     // }
-                    req.printHeaders();
+                    // req.printHeaders();
                     std::cout << std::endl << std::endl << "Response: \n"<< response << std::endl;
                     std::string hello = response;
                     if (send(client_fd, hello.c_str(), hello.length(), 0) != static_cast<long int>(hello.length()))

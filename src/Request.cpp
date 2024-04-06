@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 14:49:27 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 15:43:27 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,8 @@ void Request::readFirstLine(void)
 	_headers["Method"] = _request.substr(0, i);
 	j = _request.find_first_of(' ', i + 1);
 	_headers["Path"] = _request.substr(i + 1, j - i - 1);
-	k = _headers["Path"].find_last_of('.');
+	if ((k = _headers["Path"].find_last_of('.')) == std::string::npos)
+        k = 0;
 	extension = _headers["Path"].substr(k, _headers["Path"].length() - 1);
 	if (extension.find("?") != std::string::npos)
 	{
