@@ -3,17 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 13:58:33 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 16:59:57 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Response.hpp"
 #include "main.hpp"
 
-Response::Response(): _is_dir(false)
+Response::Response(): _is_dir(false), _is_autoindex(false)
 {
 	_status[200] = "OK";
 	_status[201] = "Created";
@@ -41,12 +41,19 @@ void Response::setStatusCode(int statusCode)
 void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
 {
 	checkOpenFile(req.getPath(), req, route);
-	// if (this->_is_dir)
-	// 	this->openDirectory();
+	if (this->_is_autoindex)
+	{
+		this->openListTree();
+		return ;
+	}
+	if (this->_is_dir)
+	{
+		this->openDirectory(route);
+		return ;
+	}
 	setVersion(req.getVersion());
 	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
 	{
-		std::cout << "ERGREGREGERGER" << std::endl;
 		setContentType(req.getContentType());
 	}
 	else
@@ -124,7 +131,6 @@ int Response::CGIBodyLength(std::string cgiBody)
 
 void Response::setBody(std::string code, std::string path)
 {
-	std::cout << path << "================" << std::endl;
 	std::string body = readFile(code, path);
 	_response += body;
 }
@@ -142,20 +148,33 @@ std::string Response::getStatusCode(void) const
 	return (ss.str());
 }
 
-bool isDirectory(const std::string& path)
+void Response::openListTree()
+{
+	AutoIndex index;
+	std::string str = index.generateAutoIndexHTML(this->_path);
+	std::stringstream ss;
+	ss << str.length();
+	this->_response += "HTTP/1.1 200 OK\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
+	this->_response += str;
+}
+
+void Response::openDirectory(struct RouteConfig route)
+{
+	this->_response += "HTTP/1.1 301 Moved Permanently\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
+}
+
+int isDirectoryOrIndex(const std::string& path)
 {
     struct stat info;
     if (stat(path.c_str(), &info) != 0) {
-        // La fonction stat a échoué, le chemin n'existe peut-être pas
-        return false;
+		if (!path.empty() && path[path.size() - 1] == '/')
+		{
+        	return -1;
+    	}
+        return 0;
     }
     return S_ISDIR(info.st_mode);
 }
-
-// void Response::openDirectory()
-// {
-// 	setStatusCode(301);
-// }
 
 void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig route)
 {
@@ -163,17 +182,24 @@ void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig 
 	
 	path = route.root + path;
 	this->_path = path;
-	// if (isDirectory(this->_path))
-	// {
-	// 	this->_is_dir = true;
-	// 	return ;
-	// }
+	if (isDirectoryOrIndex(this->_path) == -1)
+	{
+		this->_is_dir = true;
+		return ;
+	}
+	else if (isDirectoryOrIndex(this->_path) > 0)
+	{
+		if (route.autoindex)
+			this->_is_autoindex = true;
+		else
+			this->_is_dir = true;
+		return ;
+	}
 	if (path.find("pages/cgi-bin") != std::string::npos)
 	{
 		path.erase(0, path.find("pages/cgi-bin"));
 		page.open((path).c_str());
 		this->_path = path;
-		std::cout << path << std::endl;
 	}
 	else
 		page.open((path).c_str());
@@ -196,7 +222,6 @@ std::string Response::readFile(std::string code, std::string path)
 	std::ifstream page;
 	
 	// path.erase(0, 1);
-	std::cout << path << std::endl;
 	if (code == "200")
 		page.open((path).c_str());
 	else

@@ -8,6 +8,7 @@ SRCS = src/Response.cpp \
 		src/config.cpp \
 		src/main.cpp \
 		src/Request.cpp \
+		src/AutoIndex.cpp \
 		src/CGIHandler.cpp
 
 INCLUDE = -I inc/
