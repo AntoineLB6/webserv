@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 18:06:05 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 16:03:51 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,8 +132,8 @@ int	main(int argc, char **argv)
                 // std::cout << "====== " << check_to_read << std::endl;
                 // if (check_to_read.find("\r\n\r\n") != std::string::npos)
                 // {
-                    char buffer[1024] = {0};
-                    valread = recv(client_fd, buffer, 1024, MSG_DONTWAIT);
+                    char buffer[10240] = {0};
+                    valread = recv(client_fd, buffer, 10240, MSG_DONTWAIT);
                     if (valread < 1)
                     {
                         if (errno == EAGAIN || errno == EWOULDBLOCK)
