@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 16:42:42 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 18:26:25 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,7 @@ class Response
 		void setContentType(std::string contentType);
 		void setContentLength(std::string contentLength);
 		void setCGIContentLength(std::string path);
+		void setStatus(struct RouteConfig route);
 		void setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route);
 		void setStatusCode(int statusCode);
 		void setDate(void);

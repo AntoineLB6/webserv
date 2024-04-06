@@ -25,8 +25,6 @@ struct RouteConfig
 {
     std::vector<std::string> limit_except_accepted;
     std::map<int, std::string> return_codes;
-    int return_code;
-    std::string return_redirection;
     std::string root;
     bool autoindex;
     std::string default_page;

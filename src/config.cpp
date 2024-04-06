@@ -62,14 +62,11 @@ std::vector<WebConfig> getConfig(std::string path)
                     defaultRoute(route);
                     config.routes.insert(std::make_pair("/", *route));
                 }
-                else
+                for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
                 {
-                    for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
-                    {
-                        RouteConfig& route = it->second;
-                        if (route.limit_except_accepted.empty())
-                            route.limit_except_accepted.push_back("GET");
-                    }
+                    RouteConfig& route = it->second;
+                    if (route.limit_except_accepted.empty())
+                        route.limit_except_accepted.push_back("GET");
                 }
                 server_configs.push_back(config);
             }
@@ -117,8 +114,6 @@ std::vector<WebConfig> getConfig(std::string path)
 
 void defaultRoute(struct RouteConfig *route_config)
 {
-    route_config->return_code = 301;
-    route_config->return_redirection = "http://www.google.com/";
     route_config->root = "./pages";
     route_config->autoindex = true;
     route_config->default_page = "index.html";
@@ -231,8 +226,6 @@ void put_setting_return(std::vector<std::string> tokens, std::string currentConf
         if (tokens[0] == "return")
         {
             route->return_codes[std::atoi(tokens[1].c_str())] = tokens[2];
-            route->return_code = std::atoi(tokens[1].c_str());
-            route->return_redirection = tokens[2];
         }
         else
         {
@@ -267,10 +260,6 @@ void put_setting_http(std::vector<std::string> tokens, std::string currentConfig
             for (size_t i = 1; i < tokens.size(); i++)
             {
                 route->limit_except_accepted.push_back(tokens[i]);
-            }
-            for (std::vector<std::string>::iterator it = route->limit_except_accepted.begin(); it != route->limit_except_accepted.end(); it++)
-            {
-                std::cout << "\\\\\\\\\\\\\\\\\\" << *it << std::endl;
             }
         }
         else

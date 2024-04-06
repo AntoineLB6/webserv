@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 16:59:57 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 18:36:06 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,17 @@ void Response::setStatusCode(int statusCode)
 	this->_statusCode = statusCode;
 }
 
+void Response::setStatus(struct RouteConfig route)
+{
+	for (std::map<int, std::string>::iterator it = route.return_codes.begin(); it != route.return_codes.end(); it++)
+	{
+		this->_status[it->first] = it->second;
+	}
+}
+
 void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
 {
+	this->setStatus(route);
 	checkOpenFile(req.getPath(), req, route);
 	if (this->_is_autoindex)
 	{
@@ -226,6 +235,7 @@ std::string Response::readFile(std::string code, std::string path)
 		page.open((path).c_str());
 	else
 		page.open(("pages/" + code + ".html").c_str());
+		// ici mettre errors pages
 	std::string body;
 	std::string line;
 	if (page.is_open())
