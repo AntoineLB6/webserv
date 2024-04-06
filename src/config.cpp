@@ -230,6 +230,7 @@ void put_setting_return(std::vector<std::string> tokens, std::string currentConf
         
         if (tokens[0] == "return")
         {
+            route->return_codes[std::atoi(tokens[1].c_str())] = tokens[2];
             route->return_code = std::atoi(tokens[1].c_str());
             route->return_redirection = tokens[2];
         }

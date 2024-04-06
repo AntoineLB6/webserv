@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 15:51:12 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 17:46:07 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,12 @@ int	main(int argc, char **argv)
             RouteConfig route = it->second;
             std::cout << "==== Chemin : " << it->first << std::endl;
             std::cout << "Return Code : " << route.return_code << " | " << route.return_redirection << std::endl;
+            std::cout << "--Returned Codes : ";
+            for (std::map<int, std::string>::iterator it = route.return_codes.begin(); it != route.return_codes.end(); it++)
+            {
+                std::cout << it->first << " " << it->second << " | ";
+            }
+            std::cout << std::endl;
             std::cout << "Root : " << route.root << std::endl;
             std::cout << "Autoindex : " << route.autoindex << std::endl;
             std::cout << "Default Page : " << route.default_page << std::endl;
