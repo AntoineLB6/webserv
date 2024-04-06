@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 15:34:54 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 17:30:39 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ void CGIHandler::setCgiEnv(Request &req)
 	// this->_envMap["CONTENT_TYPE"] = "application/x-www-form-urlencoded;charset=utf-8";
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 	this->_envMap["QUERY_STRING"] = req.getBody();
+	std::cout << req.getPath() << std::endl;
 	this->_envMap["SCRIPT_FILENAME"] = req.getPath().substr(1, req.getPath().length() - 1);
 	this->_envMap["SERVER_PORT"] = req.getPort();
 	this->_envMap["REQUEST_METHOD"] = req.getHeaders()["Method"];
