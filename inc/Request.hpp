@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:17 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/02 13:41:57 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 14:49:03 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,4 +51,5 @@ class Request
 		std::string getPort(void) const ;
 		std::string getContentLength(void) ;
 		std::string getRequest(void) const ;
+		std::string getBody(void) const ;
 };

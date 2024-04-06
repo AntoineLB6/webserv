@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 13:55:28 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 14:49:38 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ void CGIHandler::setCgiEnv(Request &req)
 	// this->_envMap["CONTENT_TYPE"] = req.getContentType();
 	this->_envMap["CONTENT_TYPE"] = "application/x-www-form-urlencoded;charset=utf-8";
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
-	// this->_envMap["PATH_INFO"] = ""
-	this->_envMap["SCRIPT_FILENAME"] ="pages/cgi-bin/test.php";
+	this->_envMap["QUERY_STRING"] = req.getBody();
+	this->_envMap["SCRIPT_FILENAME"] ="pages/cgi-bin/script.php";
 	this->_envMap["SERVER_PORT"] = req.getPort();
 	this->_envMap["REQUEST_METHOD"] = req.getHeaders()["Method"];
 	this->_envMap["SERVER_PROTOCOL"] = req.getHeaders()["Version"];
@@ -105,6 +105,7 @@ std::string CGIHandler::execute(Request &req)
 	{	
 		close(fdin[0]);
 		write(fdin[1], req.getHeaders()["Body"].c_str(), req.getHeaders()["Body"].size());
+		std::cerr << "HTRHRTHRTHRTHTRH" << req.getHeaders()["Body"].c_str() << std::endl;
 		close(fdin[1]);
 		close(fdout[1]);
 		waitpid(pid, &status, 0);
@@ -117,6 +118,7 @@ std::string CGIHandler::execute(Request &req)
 		} while (bytes > 0);
 		close(fdout[0]);
 	}
+	std::cout << "Response body CGI ==========  " << responseBody << std::endl;
 	return (responseBody);
 }
 

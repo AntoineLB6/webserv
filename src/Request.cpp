@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 00:47:00 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/06 14:49:27 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,6 +58,11 @@ std::string Request::getPath(void) const
 std::string Request::getMethod(void) const
 {
 	return (getHeaders()["Method"]);
+}
+
+std::string Request::getBody(void) const
+{
+	return (getHeaders()["Body"]);
 }
 
 std::string Request::getContentType(void) const
@@ -137,11 +142,20 @@ void Request::readFirstLine(void)
 {
 	size_t i;
 	size_t j;
+	size_t k;
+	std::string extension;
 	
 	i = _request.find_first_of(' ');
 	_headers["Method"] = _request.substr(0, i);
 	j = _request.find_first_of(' ', i + 1);
 	_headers["Path"] = _request.substr(i + 1, j - i - 1);
+	k = _headers["Path"].find_last_of('.');
+	extension = _headers["Path"].substr(k, _headers["Path"].length() - 1);
+	if (extension.find("?") != std::string::npos)
+	{
+		_headers["Body"] = _headers["Path"].substr(_headers["Path"].find_first_of("?") + 1, _headers["Path"].length() - 1); 
+		_headers["Path"] = _headers["Path"].substr(0, _headers["Path"].find("?"));
+	}
 	i = j;
 	j = 0;
 	j = _request.find_first_of('\r', i + 1);
@@ -171,7 +185,8 @@ void Request::fillHeaders(void)
 		}
 		else
 		{
-			_headers["Body"] = _request.substr(i + 2, _request.find_last_of('\n', i) - 1 - i);
+			if (_headers["Body"].empty())
+				_headers["Body"] = _request.substr(i + 2, _request.find_last_of('\n', i) - 1 - i);
 			break ;
 		}
 		if (_request.substr(i, i + 4) == "\r\n\r\n")

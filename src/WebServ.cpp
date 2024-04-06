@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 15:02:04 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 14:21:25 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,6 +135,8 @@ int WebServ::create_client()
 std::string handleGET(Request &req, struct RouteConfig route)
 {
     Response response;
+    std::string cgiBody = "";
+    std::string rep;
     // location redirect
     // location errorPages
     // location allowedMethods
@@ -147,13 +149,20 @@ std::string handleGET(Request &req, struct RouteConfig route)
         // check allowed methods => 405
         if (req.getPath().find("cgi-bin") != std::string::npos)
         {
-            handleCGI(req, response);
-            return (NULL);
+            cgiBody = handleCGI(req, response);
         }
-        
     }
-    response.setHeaders(req, 0, "", route);
-    return (response.getResponse());
+    if (req.getPath().find("cgi-bin") != std::string::npos)
+    {
+        response.setHeaders(req, 1, cgiBody, route);
+    }
+    else
+        response.setHeaders(req, 0, cgiBody, route);
+    if (!cgiBody.empty())
+        rep = response.getResponse() + cgiBody;
+    else
+        rep = response.getResponse();
+    return (rep);
 }
 
 std::string handlePOST(Request &req, struct RouteConfig route)
@@ -191,7 +200,7 @@ std::string handlePOST(Request &req, struct RouteConfig route)
         // if (contentType == "multipart/form-data")
         //     rep = handleFileUploads(req);
     }
-    return (rep); 
+    return (rep);
 }
 
 std::string handleDELETE(Request &req, struct RouteConfig route)

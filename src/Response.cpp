@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 18:25:51 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/06 13:58:33 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,9 +168,12 @@ void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig 
 	// 	this->_is_dir = true;
 	// 	return ;
 	// }
-	if (path.find("cgi-bin") != std::string::npos)
+	if (path.find("pages/cgi-bin") != std::string::npos)
 	{
+		path.erase(0, path.find("pages/cgi-bin"));
 		page.open((path).c_str());
+		this->_path = path;
+		std::cout << path << std::endl;
 	}
 	else
 		page.open((path).c_str());
