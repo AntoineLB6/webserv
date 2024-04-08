@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:02:43 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:15:08 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ Response::Response(): _is_dir(false), _is_autoindex(false)
 	_status[401] = "Unauthorized";
 	_status[403] = "Forbidden";
 	_status[404] = "Not Found";
+	_status[413] = "Payload Too Large";
 	_status[415] = "Unsupported Media Type";
 }
 
@@ -41,6 +42,7 @@ Response::Response(struct WebConfig config): _is_dir(false), _is_autoindex(false
 	_status[401] = "Unauthorized";
 	_status[403] = "Forbidden";
 	_status[404] = "Not Found";
+	_status[413] = "Payload Too Large";
 	_status[415] = "Unsupported Media Type";
 	for (std::map<int, std::string>::iterator it = config.errors_pages.begin(); it != config.errors_pages.end(); ++it)
 	{

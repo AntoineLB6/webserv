@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:03:26 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:15:46 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -144,6 +144,10 @@ std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig c
     // location uri
     // location index
     // init un objet location
+	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	{
+		return (getErrorsPages("413", route, config));
+	}
     if (req.getPath() != "/")
     {
         // check allowed methods => 405
@@ -171,6 +175,10 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     std::string cgiBody = "";
     std::string rep;
     
+	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	{
+		return (getErrorsPages("413", route, config));
+	}
     if (req.getPath() != "/")
     {
         // check allowed methods => 405
@@ -211,6 +219,13 @@ std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfi
     Response response(config);
     (void)req;
     (void)route;
+    
+    std::cout <<  "dfffffffffffffffffffffffffffffffff" << std::endl;
+    std::cout << req.getPath() << std::endl;
+	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	{
+		return (getErrorsPages("413", route, config));
+	}
 
     return (response.getResponse());
 }

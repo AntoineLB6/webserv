@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:04:25 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:14:29 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,7 @@ int	main(int argc, char **argv)
                 client_fd = events[i].data.fd;
             
             size_t pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
-            if ((pos == std::string::npos) && (events[i].events & EPOLLIN))
+            if ((events[i].events & EPOLLIN))
             {
                 // std::string check_to_read;
                 // if (client_fds[client_fd].getBuffer().empty())
@@ -147,8 +147,8 @@ int	main(int argc, char **argv)
                 // std::cout << "====== " << check_to_read << std::endl;
                 // if (check_to_read.find("\r\n\r\n") != std::string::npos)
                 // {
-                    char buffer[10240] = {0};
-                    valread = recv(client_fd, buffer, 10240, MSG_DONTWAIT);
+                    char buffer[1024] = {0};
+                    valread = recv(client_fd, buffer, 1024, MSG_DONTWAIT);
                     if (valread < 1)
                     {
                         if (errno == EAGAIN || errno == EWOULDBLOCK)
@@ -167,41 +167,16 @@ int	main(int argc, char **argv)
                         continue;
                     }
                     client_fds[client_fd].addToBuffer(buffer);
-
-                    // std::cout << "=========================================================" << std::endl;
-                    // std::cout << buffer << std::endl;
-                    // std::cout << "=========================================================" << std::endl;
-                    
-                    // for (it = servers.begin(); it != servers.end(); it++)
-                    // {
-                    //     WebServ* server = *it;
-                    //     if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
-                    //         if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
-                    //         {
-                    //             //Send err : "Payload Too Large" (code d'état HTTP 413).
-                    //             client_fds.erase(client_fd);
-                    //             if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
-                    //             {
-                    //                 std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
-                    //                 exit(EXIT_FAILURE);
-                    //             }
-                    //             close(client_fd);
-                    //             std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
-                    //             std::cout << "Max body reached" << std::endl;
-                    //             continue;
-                    //         }
-                    //         break;
-                    //     }
-                    // }
-                    // std::cout << buffer << " - " << valread << std::endl;
-                    std::cout << "=============================================" << std::endl;
-                    std::cout << client_fds[client_fd].getBuffer() << std::endl;
-                    std::cout << "=============================================" << std::endl;
+                    std::cout << "=========================================================" << std::endl;
+                    std::cout << buffer << std::endl;
+                    std::cout << "=========================================================" << std::endl;
+    
                 // }
             }
             
             pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
-            if (pos != std::string::npos)
+            //!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0
+            if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
             {
                 // std::string check_to_send = client_fds[client_fd].getBuffer().substr(pos + 4, client_fds[client_fd].getBuffer().size() + 4);
                 // if (check_to_send.find("\r\n\r\n") != std::string::npos)
