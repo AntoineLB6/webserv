@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test DELETE Request</title>
+</head>
+<body>
+    <h1>Test DELETE Request</h1>
+    <p>Entrez l'URL de la ressource à supprimer :</p>
+    <form id="deleteForm">
+        <label for="resourceUrl">URL de la ressource :</label><br>
+        <input type="text" id="resourceUrl" name="resourceUrl" style="width: 300px;"><br><br>
+        <input type="submit" value="Supprimer">
+    </form>
+
+    <script>
+        document.getElementById("deleteForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            var resourceUrl = document.getElementById("resourceUrl").value;
+            deleteResource(resourceUrl);
+        });
+
+        function deleteResource(url) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("DELETE", url, true);
+            xhr.onload = function () {
+                if (xhr.status == 200) {
+                    alert("Ressource supprimée avec succès !");
+                } else {
+                    alert("Erreur lors de la suppression de la ressource. Statut : " + xhr.status);
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

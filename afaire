@@ -2,6 +2,3 @@ cgi in config
 post file
 delete
 client_body_temp_path
-
-max body size
-send payload too large
