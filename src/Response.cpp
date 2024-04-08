@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 13:32:44 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:02:43 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,8 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct Ro
 		return ;
 	}
 	setVersion(req.getVersion());
-	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200)
+	int temp = req.getContentType().substr(0, req.getContentType().find(";")).compare("multipart/form-data");
+	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200 && temp)
 	{
 		setContentType(req.getContentType());
 	}
@@ -232,7 +233,9 @@ void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig 
 		this->_path = path;
 	}
 	else
+	{
 		page.open((path).c_str());
+	}
 	if (path.find(".") == std::string::npos && req.getMethod() == "GET")
 	{
 		setStatusCode(415);

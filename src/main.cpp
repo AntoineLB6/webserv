@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 13:31:01 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:04:25 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../inc/WebServ.hpp"
 #include "WebServ.hpp"
 
 int	main(int argc, char **argv)
@@ -169,31 +168,31 @@ int	main(int argc, char **argv)
                     }
                     client_fds[client_fd].addToBuffer(buffer);
 
-                    std::cout << "=========================================================" << std::endl;
-                    std::cout << buffer << std::endl;
-                    std::cout << "=========================================================" << std::endl;
+                    // std::cout << "=========================================================" << std::endl;
+                    // std::cout << buffer << std::endl;
+                    // std::cout << "=========================================================" << std::endl;
                     
-                    for (it = servers.begin(); it != servers.end(); it++)
-                    {
-                        WebServ* server = *it;
-                        if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
-                            if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
-                            {
-                                //Send err : "Payload Too Large" (code d'état HTTP 413).
-                                client_fds.erase(client_fd);
-                                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
-                                {
-                                    std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
-                                    exit(EXIT_FAILURE);
-                                }
-                                close(client_fd);
-                                std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
-                                std::cout << "Max body reached" << std::endl;
-                                continue;
-                            }
-                            break;
-                        }
-                    }
+                    // for (it = servers.begin(); it != servers.end(); it++)
+                    // {
+                    //     WebServ* server = *it;
+                    //     if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                    //         if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
+                    //         {
+                    //             //Send err : "Payload Too Large" (code d'état HTTP 413).
+                    //             client_fds.erase(client_fd);
+                    //             if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
+                    //             {
+                    //                 std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                    //                 exit(EXIT_FAILURE);
+                    //             }
+                    //             close(client_fd);
+                    //             std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
+                    //             std::cout << "Max body reached" << std::endl;
+                    //             continue;
+                    //         }
+                    //         break;
+                    //     }
+                    // }
                     // std::cout << buffer << " - " << valread << std::endl;
                     std::cout << "=============================================" << std::endl;
                     std::cout << client_fds[client_fd].getBuffer() << std::endl;
@@ -225,7 +224,7 @@ int	main(int argc, char **argv)
                             {
                                 route = config.routes.find("/")->second;
                             }
-                            std::cout << req.getMethod() << std::endl;
+                            // std::cout << req.getMethod() << std::endl;
                             
                             if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                             {

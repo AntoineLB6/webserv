@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 13:21:00 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:03:26 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,11 +194,14 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     {
         std::string contentType = req.getContentType();
         contentType = contentType.substr(0, contentType.find(";"));
-        std::cout << contentType << std::endl;
+        // std::cout << contentType << std::endl;
         // if (contentType == "application/x-www-form-urlencoded")
         //     rep = handleForm(req);
-        // if (contentType == "multipart/form-data")
-        //     rep = handleFileUploads(req);
+        if (contentType == "multipart/form-data")
+        {
+            std::cout << "UPLOAD=====" << std::endl;
+            handleFileUploads(req);
+        }
     }
     return (rep);
 }
@@ -221,10 +224,9 @@ std::string handleForm(Request &req)
     return (NULL);
 }
 
-std::string handleFileUploads(Request &req)
+void handleFileUploads(Request &req)
 {
-    (void)req;
-    return (NULL);
+    std::cout << "__________REQ BODY: " << req.getBody() << std::cout;
 }
 
 std::string handleCGI(Request &req, Response &response)

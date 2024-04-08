@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 17:36:06 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 16:01:17 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,8 @@ std::string Request::getContentType(void) const
 	std::map<std::string, std::string> map = getHeaders();
 
 	it = map.find("Content-Type");
-	if (it != map.end())
+	if (it != map.end() && !it->second.empty())
 	{
-		std::cout << "Content type map : ===============    " << std::endl;
 		return (map["Content-Type"]);
 	}
 	return (_contentType);
@@ -135,6 +134,8 @@ void Request::setContentType(void)
 		_contentType = "image/bmp";
 	else if (extension == ".txt")
 		_contentType = "text/plain";
+	else if (extension == ".ico")
+		_contentType = "image/x-icon";
 	else
 		_contentType = "text/html";
 }
@@ -178,11 +179,13 @@ void Request::fillHeaders(void)
 		if (pos != std::string::npos)
 		{
 			tmp = _request.substr(i, pos - i);
-			_headers[tmp] = _request.substr(pos + 2, _request.find_first_of('\r') - i);
+			if (_headers["Content-Type"].empty() || tmp != "Content-Type")
+				_headers[tmp] = _request.substr(pos + 2, _request.find_first_of('\r') - i);
 			size_t j = 0;
 			while (_headers[tmp][j] != '\r')
 				j++;
-			_headers[tmp].erase(j);
+			if (_headers["Content-Type"].empty() || tmp != "Content-Type")
+				_headers[tmp].erase(j);
 			i = _request.find_first_of('\r', i);
 		}
 		else
