@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/05 14:55:35 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:15:08 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,11 +69,11 @@ class WebServ
 		bool is_valid_host(const char* host);
 };
 
-std::string handleGET(Request &req, struct RouteConfig route);
-std::string handlePOST(Request &req, struct RouteConfig route);
-std::string handleDELETE(Request &req, struct RouteConfig route);
+std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig config);
+std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig config);
+std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfig config);
 std::string handleForm(Request &req);
 std::string handleFileUploads(Request &req);
 std::string handleCGI(Request &req, Response &response);
 std::string readFile(std::string code);
-std::string getErrorsPages(std::string code);
+std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config);

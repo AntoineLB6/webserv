@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 18:26:25 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 11:55:56 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,13 +40,17 @@ class Response
 		size_t _statusCode;
 		int cgiFd[2];
 		std::map<int, std::string> _status;
+		std::map<int, std::string> _errors_pages;
 		bool _is_dir;
 		bool _is_autoindex;
+		std::string _root;
 	public:
 		Response();
 		Response(const Response &other);
 		~Response();
 		Response& operator=(const Response &other);
+
+		Response(struct WebConfig config);
 		
 		// Setters
 		void setVersion(std::string version);

@@ -93,7 +93,6 @@ std::vector<WebConfig> getConfig(std::string path)
             }
             else if (tokens.size() >= 2 && tokens[0] == "limit_except")
             {
-                std::cout << "==" << currentConfig << std::endl;
                 put_setting_http(tokens, currentConfig, &config);
             }
             else
@@ -172,15 +171,13 @@ void put_setting(std::string key, std::string value, std::string currentConfig, 
     else if (config_words[0] == "location")
     {
         struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) != config->routes.end())
-            route = &config->routes.find(config_words[1])->second;
-        else
+        if (config->routes.find(config_words[1]) == config->routes.end())
         {
             route = new RouteConfig;
             defaultRoute(route);
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
-        
+        route = &config->routes.find(config_words[1])->second;
         if (key == "limit_except")
             config->port = std::atoi(value.c_str());
         else if (key == "return")
@@ -214,14 +211,13 @@ void put_setting_return(std::vector<std::string> tokens, std::string currentConf
     if (config_words[0] == "location")
     {
         struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) != config->routes.end())
-            route = &config->routes.find(config_words[1])->second;
-        else
+        if (config->routes.find(config_words[1]) == config->routes.end())
         {
             route = new RouteConfig;
             defaultRoute(route);
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
+        route = &config->routes.find(config_words[1])->second;
         
         if (tokens[0] == "return")
         {
@@ -250,7 +246,6 @@ void put_setting_http(std::vector<std::string> tokens, std::string currentConfig
         {
             route = new RouteConfig;
             defaultRoute(route);
-            // config->routes[config_words[1]] = *route;
             config->routes.insert(std::make_pair(config_words[1], *route));
         }
         route = &config->routes.find(config_words[1])->second;

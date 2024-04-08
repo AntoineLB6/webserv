@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 14:21:25 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:21:00 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,9 +132,9 @@ int WebServ::create_client()
     return client_fd;
 }
 
-std::string handleGET(Request &req, struct RouteConfig route)
+std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig config)
 {
-    Response response;
+    Response response(config);
     std::string cgiBody = "";
     std::string rep;
     // location redirect
@@ -165,9 +165,9 @@ std::string handleGET(Request &req, struct RouteConfig route)
     return (rep);
 }
 
-std::string handlePOST(Request &req, struct RouteConfig route)
+std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig config)
 {
-    Response response;
+    Response response(config);
     std::string cgiBody = "";
     std::string rep;
     
@@ -203,9 +203,9 @@ std::string handlePOST(Request &req, struct RouteConfig route)
     return (rep);
 }
 
-std::string handleDELETE(Request &req, struct RouteConfig route)
+std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfig config)
 {
-    Response response;
+    Response response(config);
     (void)req;
     (void)route;
 
@@ -239,11 +239,21 @@ std::string handleCGI(Request &req, Response &response)
     return (body);
 }
 
-std::string getErrorsPages(std::string code)
+std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config)
 {
     std::ifstream page;
 
-    page.open(("pages/" + code + ".html").c_str());
+    if (config.errors_pages.find(std::atoi(code.c_str())) != config.errors_pages.end())
+    {
+        page.open((route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str());
+        if (!page.is_open())
+        {
+            page.close();
+            page.open(("pages/" + code + ".html").c_str());
+        }
+    }
+    else
+        page.open(("pages/" + code + ".html").c_str());
     std::string body;
 	std::string line;
     

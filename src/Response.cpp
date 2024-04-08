@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 18:36:06 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:32:44 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,26 @@ Response::Response(): _is_dir(false), _is_autoindex(false)
 	_status[403] = "Forbidden";
 	_status[404] = "Not Found";
 	_status[415] = "Unsupported Media Type";
+}
+
+
+Response::Response(struct WebConfig config): _is_dir(false), _is_autoindex(false)
+{
+	_status[200] = "OK";
+	_status[201] = "Created";
+	_status[202] = "Accepted";
+	_status[204] = "No Content";
+	_status[301] = "Moved Permanently";
+	_status[302] = "Found";
+	_status[400] = "Bad Request";
+	_status[401] = "Unauthorized";
+	_status[403] = "Forbidden";
+	_status[404] = "Not Found";
+	_status[415] = "Unsupported Media Type";
+	for (std::map<int, std::string>::iterator it = config.errors_pages.begin(); it != config.errors_pages.end(); ++it)
+	{
+		this->_errors_pages[it->first] = it->second;
+	}
 }
 
 Response::~Response()
@@ -48,6 +68,7 @@ void Response::setStatus(struct RouteConfig route)
 
 void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
 {
+	this->_root = route.root;
 	this->setStatus(route);
 	checkOpenFile(req.getPath(), req, route);
 	if (this->_is_autoindex)
@@ -163,13 +184,13 @@ void Response::openListTree()
 	std::string str = index.generateAutoIndexHTML(this->_path);
 	std::stringstream ss;
 	ss << str.length();
-	this->_response += "HTTP/1.1 200 OK\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
+	this->_response += "HTTP/1.1 200 " + this->_status.find(200)->second + "\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
 	this->_response += str;
 }
 
 void Response::openDirectory(struct RouteConfig route)
 {
-	this->_response += "HTTP/1.1 301 Moved Permanently\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
+	this->_response += "HTTP/1.1 301 " + this->_status.find(301)->second + "\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
 }
 
 int isDirectoryOrIndex(const std::string& path)
@@ -234,8 +255,20 @@ std::string Response::readFile(std::string code, std::string path)
 	if (code == "200")
 		page.open((path).c_str());
 	else
-		page.open(("pages/" + code + ".html").c_str());
-		// ici mettre errors pages
+	{
+		if (this->_errors_pages.find(std::atoi(code.c_str())) != this->_errors_pages.end())
+		{
+			page.open((this->_root + "/" + this->_errors_pages.find(std::atoi(code.c_str()))->second).c_str());
+			if (!page.is_open())
+			{
+				page.close();
+				page.open(("pages/" + code + ".html").c_str());
+			}
+		}
+		else
+			page.open(("pages/" + code + ".html").c_str());
+		
+	}
 	std::string body;
 	std::string line;
 	if (page.is_open())

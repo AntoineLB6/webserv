@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 18:38:14 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/08 13:31:01 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,23 @@ int	main(int argc, char **argv)
     }
 
     std::vector<WebConfig> server_configs = getConfig(path);
-
+    
     int i = 1;
     for (std::vector<WebConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
     {
         std::cout << "Config 1" << std::endl;
         WebConfig config = *it;
+
+        std::cout << "Port : " << config.port << std::endl;
+        std::cout << "Server Name : " << config.server_name << std::endl;
+
+        std::cout << "Errors pages : ";
+        for (std::map<int, std::string>::iterator it = config.errors_pages.begin(); it != config.errors_pages.end(); ++it)
+        {
+            std::cout << it->first << " " << it->second << " | ";
+        }
+        std::cout << std::endl;
+        
         for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
         {
             RouteConfig route = it->second;
@@ -158,31 +169,31 @@ int	main(int argc, char **argv)
                     }
                     client_fds[client_fd].addToBuffer(buffer);
 
-                    // std::cout << "=========================================================" << std::endl;
-                    // std::cout << buffer << std::endl;
-                    // std::cout << "=========================================================" << std::endl;
+                    std::cout << "=========================================================" << std::endl;
+                    std::cout << buffer << std::endl;
+                    std::cout << "=========================================================" << std::endl;
                     
-                    // for (it = servers.begin(); it != servers.end(); it++)
-                    // {
-                    //     WebServ* server = *it;
-                    //     if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
-                    //         if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
-                    //         {
-                    //             //Send err : "Payload Too Large" (code d'état HTTP 413).
-                    //             client_fds.erase(client_fd);
-                    //             if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
-                    //             {
-                    //                 std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
-                    //                 exit(EXIT_FAILURE);
-                    //             }
-                    //             close(client_fd);
-                    //             std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
-                    //             std::cout << "Max body reached" << std::endl;
-                    //             continue;
-                    //         }
-                    //         break;
-                    //     }
-                    // }
+                    for (it = servers.begin(); it != servers.end(); it++)
+                    {
+                        WebServ* server = *it;
+                        if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                            if ((long)client_fds[client_fd].getBufferSize() > server->getMaxBodySize())
+                            {
+                                //Send err : "Payload Too Large" (code d'état HTTP 413).
+                                client_fds.erase(client_fd);
+                                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
+                                {
+                                    std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                                    exit(EXIT_FAILURE);
+                                }
+                                close(client_fd);
+                                std::cout << "_____________________________________________________________________________________________________________________________" << std::endl;
+                                std::cout << "Max body reached" << std::endl;
+                                continue;
+                            }
+                            break;
+                        }
+                    }
                     // std::cout << buffer << " - " << valread << std::endl;
                     std::cout << "=============================================" << std::endl;
                     std::cout << client_fds[client_fd].getBuffer() << std::endl;
@@ -198,11 +209,11 @@ int	main(int argc, char **argv)
                 // {
                     Request req(client_fds[client_fd].getBuffer());
                     std::string response;
-                    
                     for (it = servers.begin(); it != servers.end(); it++)
                     {
                         WebServ* server = *it;
-                        if (client_fds[client_fd].getServerFd() == server->getServerFd()) {
+                        if (client_fds[client_fd].getServerFd() == server->getServerFd())
+                        {
                             WebConfig config = server->getConfig();
                             struct RouteConfig route;
                             
@@ -218,17 +229,17 @@ int	main(int argc, char **argv)
                             
                             if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                             {
-                                response = handleGET(req, route);
+                                response = handleGET(req, route, config);
                             }
                             else if (req.getMethod() == "POST" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                             {
-                                response = handlePOST(req, route);
+                                response = handlePOST(req, route, config);
                             }
                             else if (req.getMethod() == "DELETE" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
-                                response = handleDELETE(req, route);
+                                response = handleDELETE(req, route, config);
                             else
                             {
-                                response = getErrorsPages("501");
+                                response = getErrorsPages("501", route, config);
                             }
                             break;
                         }
