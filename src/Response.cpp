@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 02:31:32 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 11:12:03 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,11 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct Ro
 	this->_root = route.root;
 	this->setStatus(route);
 	checkOpenFile(req.getPath(), req, route);
+	if (req.getMethod() == "DELETE")
+	{
+		this->getDeleteRes(flag);
+		return ;
+	}
 	if (this->_is_autoindex)
 	{
 		this->openListTree();
@@ -193,6 +198,39 @@ void Response::openListTree()
 void Response::openDirectory(struct RouteConfig route)
 {
 	this->_response += "HTTP/1.1 301 " + this->_errors_pages.find(301)->second + "\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
+}
+
+void Response::getDeleteRes(int flag)
+{
+	std::stringstream ss;
+	ss << flag;
+	std::string loc;
+	std::string msg;
+	switch (flag)
+	{
+	case 200:
+	{
+		// loc = "success-delete.html";
+		msg = "La ressource a été supprimée avec succès.";
+		break;
+	}
+	case 403:
+	{
+		// loc = "forbidden-delete.html";
+		msg = "Vous n'êtes pas autorisé à supprimer cette ressource.";
+		break;
+	}
+	case 404:
+	{
+		// loc = "nf-delete.html";
+		msg = "La ressource demandée n'a pas été trouvée sur le serveur.";
+		break;
+	}
+	default:
+		break;
+	}
+	// this->_response += "HTTP/1.1 " + ss.str() + " " + this->_errors_pages.find(flag)->second + "\nLocation: pages/" + loc + "\nContent-Type: text/plain\nConnection: close\n\n" + msg;
+	this->_response += "HTTP/1.1 " + ss.str() + " " + this->_errors_pages.find(flag)->second + "\nContent-Type: text/plain\nConnection: close\n\n" + msg + "\n\n";
 }
 
 int isDirectoryOrIndex(const std::string& path)

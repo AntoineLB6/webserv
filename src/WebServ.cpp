@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 02:20:45 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 11:11:20 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -216,19 +216,49 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     return (rep);
 }
 
+bool isDirectory(const std::string& path)
+{
+	struct stat info;
+	if (stat(path.c_str(), &info) != 0) {
+        if (!path.empty() && path[path.size() - 1] == '/')
+		{
+        	return true;
+    	}
+		return false;
+	}
+	return S_ISDIR(info.st_mode);
+}
+
 std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfig config)
 {
     Response response(config);
+    std::string cgiBody = "";
     (void)req;
     (void)route;
     
-    std::cout <<  "dfffffffffffffffffffffffffffffffff" << std::endl;
-    std::cout << req.getPath() << std::endl;
+
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
 	{
 		return (getErrorsPages("413", route, config, response));
 	}
-
+    std::string path = route.root + req.getPath();
+    std::string res;
+    std::cout <<  "dfffffffffffffffffffffffffffffffff" << std::endl;
+    std::cout << path << std::endl;
+    if (isDirectory(path))
+    {
+        response.setHeaders(req, 403, cgiBody, route);
+    }
+    else
+    {
+        if (std::remove(path.c_str()) != 0)
+        {
+            response.setHeaders(req, 404, cgiBody, route);
+        } else
+        {
+            response.setHeaders(req, 200, cgiBody, route);
+        }
+    }
     return (response.getResponse());
 }
 

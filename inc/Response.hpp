@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 01:31:09 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 10:50:36 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ class Response
 		void checkOpenFile(std::string path, Request &req, struct RouteConfig route) ;
 		void openDirectory(struct RouteConfig route);
 		void openListTree();
+		void getDeleteRes(int flag);
 		std::string readFile(std::string code, std::string path);
 		int CGIBodyLength(std::string cgiBody);
 };
