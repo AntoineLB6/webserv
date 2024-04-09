@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:14:29 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 01:23:59 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -167,9 +167,9 @@ int	main(int argc, char **argv)
                         continue;
                     }
                     client_fds[client_fd].addToBuffer(buffer);
-                    std::cout << "=========================================================" << std::endl;
+                    // std::cout << "=========================================================" << std::endl;
                     std::cout << buffer << std::endl;
-                    std::cout << "=========================================================" << std::endl;
+                    // std::cout << "=========================================================" << std::endl;
     
                 // }
             }
@@ -199,7 +199,6 @@ int	main(int argc, char **argv)
                             {
                                 route = config.routes.find("/")->second;
                             }
-                            // std::cout << req.getMethod() << std::endl;
                             
                             if (req.getMethod() == "GET" && (std::find(route.limit_except_accepted.begin(), route.limit_except_accepted.end(), req.getMethod()) != route.limit_except_accepted.end()))
                             {
@@ -213,29 +212,14 @@ int	main(int argc, char **argv)
                                 response = handleDELETE(req, route, config);
                             else
                             {
-                                response = getErrorsPages("501", route, config);
+                                Response rep;
+                                response = getErrorsPages("501", route, config, rep);
                             }
                             break;
                         }
                     }
-                    // if (req.getMethod() == "GET")
-                    // {
-                    //     response = handleGET(req);
-                    // }
-                    // else if (req.getMethod() == "POST")
-                    // {
-                    //     response = handlePOST(req);
-                    // }
-                    // else if (req.getMethod() == "DELETE")
-                    //     response = handleDELETE(req);
-                    // else
-                    // {
-                    //     response = getErrorsPages("501");
-                    // }
-                    // req.printHeaders();
                     std::cout << std::endl << std::endl << "Response: \n"<< response << std::endl;
-                    std::string hello = response;
-                    if (send(client_fd, hello.c_str(), hello.length(), 0) != static_cast<long int>(hello.length()))
+                    if (send(client_fd, response.c_str(), response.length(), 0) != static_cast<long int>(response.length()))
                     {
                         std::cerr << "Error Sending : " << std::endl;
                     }

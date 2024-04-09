@@ -2,3 +2,8 @@ cgi in config
 post file
 delete
 client_body_temp_path
+
+a faire:
+chrome renvoie des 501 internal server error parfois mais pas firefox
+
+requete non gere -> redirection

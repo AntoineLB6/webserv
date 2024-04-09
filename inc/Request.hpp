@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:17 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 14:49:03 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/08 21:55:50 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,8 @@ class Request
 		std::string _contentType;
 		std::string _port;
 		std::string _contentLength;
+		std::string _filename;
+		std::string _boundary;
 	public:
 		Request();
 		Request(std::string request);
@@ -52,4 +54,5 @@ class Request
 		std::string getContentLength(void) ;
 		std::string getRequest(void) const ;
 		std::string getBody(void) const ;
+		std::string getFilename(void) const ;
 };

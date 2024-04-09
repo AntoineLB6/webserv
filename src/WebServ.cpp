@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:15:46 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 02:20:45 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,7 @@ std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig c
     // init un objet location
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
 	{
-		return (getErrorsPages("413", route, config));
+		return (getErrorsPages("413", route, config, response));
 	}
     if (req.getPath() != "/")
     {
@@ -175,9 +175,10 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     std::string cgiBody = "";
     std::string rep;
     
+    response.setStatus(route);
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
 	{
-		return (getErrorsPages("413", route, config));
+		return (getErrorsPages("413", route, config, response));
 	}
     if (req.getPath() != "/")
     {
@@ -195,20 +196,21 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     else
         response.setHeaders(req, 0, cgiBody, route);
     if (!cgiBody.empty())
+    {
         rep = response.getResponse() + cgiBody;
+        // return (rep);
+    }
     else
         rep = response.getResponse();
     if (response.getStatusCode() == "200")
     {
         std::string contentType = req.getContentType();
         contentType = contentType.substr(0, contentType.find(";"));
-        // std::cout << contentType << std::endl;
-        // if (contentType == "application/x-www-form-urlencoded")
-        //     rep = handleForm(req);
         if (contentType == "multipart/form-data")
         {
-            std::cout << "UPLOAD=====" << std::endl;
-            handleFileUploads(req);
+            std::string uploadRep = handleFileUploads(req, route, config, response);
+            if (!uploadRep.empty())
+                rep = uploadRep;
         }
     }
     return (rep);
@@ -224,7 +226,7 @@ std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfi
     std::cout << req.getPath() << std::endl;
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
 	{
-		return (getErrorsPages("413", route, config));
+		return (getErrorsPages("413", route, config, response));
 	}
 
     return (response.getResponse());
@@ -239,9 +241,21 @@ std::string handleForm(Request &req)
     return (NULL);
 }
 
-void handleFileUploads(Request &req)
+std::string handleFileUploads(Request &req, struct RouteConfig route, struct WebConfig config, Response &response)
 {
-    std::cout << "__________REQ BODY: " << req.getBody() << std::cout;
+    std::ofstream outfile((route.client_body_temp_path + req.getFilename()).c_str());
+    std::string rep;
+
+    if (outfile.is_open())
+    {
+        outfile << req.getBody();
+        outfile.close();
+    }
+    else
+    {
+        rep = getErrorsPages("404", route, config, response);
+    }
+    return (rep);
 }
 
 std::string handleCGI(Request &req, Response &response)
@@ -256,13 +270,14 @@ std::string handleCGI(Request &req, Response &response)
     return (body);
 }
 
-std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config)
+std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config, Response &response)
 {
     std::ifstream page;
 
     if (config.errors_pages.find(std::atoi(code.c_str())) != config.errors_pages.end())
     {
         page.open((route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str());
+        std::cout << "PATH: " << (route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str() << std::endl;
         if (!page.is_open())
         {
             page.close();
@@ -281,7 +296,7 @@ std::string getErrorsPages(std::string code, struct RouteConfig route, struct We
 	}
     std::stringstream ss;
     ss << body.length();
-    std::string rep = "HTTP/1.1 501 Internal Server Error\nContent-Type: text/html\nContent-Length: " + ss.str() + "\nServer: webserv\n\n";
+    std::string rep = "HTTP/1.1 " + code + " " + response.getErrorsPages()[std::atoi(code.c_str())] + "\nContent-Type: text/html\nContent-Length: " + ss.str() + "\nServer: webserv\n\n";
     rep += body;
     page.close();
     return (rep);

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:15:08 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 02:31:32 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,35 +15,13 @@
 
 Response::Response(): _is_dir(false), _is_autoindex(false)
 {
-	_status[200] = "OK";
-	_status[201] = "Created";
-	_status[202] = "Accepted";
-	_status[204] = "No Content";
-	_status[301] = "Moved Permanently";
-	_status[302] = "Found";
-	_status[400] = "Bad Request";
-	_status[401] = "Unauthorized";
-	_status[403] = "Forbidden";
-	_status[404] = "Not Found";
-	_status[413] = "Payload Too Large";
-	_status[415] = "Unsupported Media Type";
+	setErrorsPages();
 }
 
 
 Response::Response(struct WebConfig config): _is_dir(false), _is_autoindex(false)
 {
-	_status[200] = "OK";
-	_status[201] = "Created";
-	_status[202] = "Accepted";
-	_status[204] = "No Content";
-	_status[301] = "Moved Permanently";
-	_status[302] = "Found";
-	_status[400] = "Bad Request";
-	_status[401] = "Unauthorized";
-	_status[403] = "Forbidden";
-	_status[404] = "Not Found";
-	_status[413] = "Payload Too Large";
-	_status[415] = "Unsupported Media Type";
+	setErrorsPages();
 	for (std::map<int, std::string>::iterator it = config.errors_pages.begin(); it != config.errors_pages.end(); ++it)
 	{
 		this->_errors_pages[it->first] = it->second;
@@ -55,6 +33,22 @@ Response::~Response()
 
 }
 
+void Response::setErrorsPages(void)
+{
+	_errors_pages[200] = "OK";
+	_errors_pages[201] = "Created";
+	_errors_pages[202] = "Accepted";
+	_errors_pages[204] = "No Content";
+	_errors_pages[301] = "Moved Permanently";
+	_errors_pages[302] = "Found";
+	_errors_pages[400] = "Bad Request";
+	_errors_pages[401] = "Unauthorized";
+	_errors_pages[403] = "Forbidden";
+	_errors_pages[404] = "Not Found";
+	_errors_pages[413] = "Payload Too Large";
+	_errors_pages[415] = "Unsupported Media Type";
+}
+
 void Response::setStatusCode(int statusCode)
 {
 	this->_statusCode = statusCode;
@@ -64,7 +58,7 @@ void Response::setStatus(struct RouteConfig route)
 {
 	for (std::map<int, std::string>::iterator it = route.return_codes.begin(); it != route.return_codes.end(); it++)
 	{
-		this->_status[it->first] = it->second;
+		this->_errors_pages[it->first] = it->second;
 	}
 }
 
@@ -112,7 +106,7 @@ void Response::setVersion(std::string version)
 {
 	std::stringstream ss;
 	ss << _statusCode;
-	this->_response += version + " " + ss.str() + " " + _status[_statusCode] + "\n";
+	this->_response += version + " " + ss.str() + " " + _errors_pages[_statusCode] + "\n";
 }
 
 void Response::setContentType(std::string contentType)
@@ -181,19 +175,24 @@ std::string Response::getStatusCode(void) const
 	return (ss.str());
 }
 
+std::map<int, std::string> Response::getErrorsPages(void) const
+{
+	return (_errors_pages);
+}
+
 void Response::openListTree()
 {
 	AutoIndex index;
 	std::string str = index.generateAutoIndexHTML(this->_path);
 	std::stringstream ss;
 	ss << str.length();
-	this->_response += "HTTP/1.1 200 " + this->_status.find(200)->second + "\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
+	this->_response += "HTTP/1.1 200 " + this->_errors_pages.find(200)->second + "\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
 	this->_response += str;
 }
 
 void Response::openDirectory(struct RouteConfig route)
 {
-	this->_response += "HTTP/1.1 301 " + this->_status.find(301)->second + "\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
+	this->_response += "HTTP/1.1 301 " + this->_errors_pages.find(301)->second + "\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
 }
 
 int isDirectoryOrIndex(const std::string& path)

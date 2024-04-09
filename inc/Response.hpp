@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 11:55:56 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/09 01:31:09 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,6 @@ class Response
 		std::map<std::string, std::string> _header;
 		size_t _statusCode;
 		int cgiFd[2];
-		std::map<int, std::string> _status;
 		std::map<int, std::string> _errors_pages;
 		bool _is_dir;
 		bool _is_autoindex;
@@ -56,7 +55,6 @@ class Response
 		void setVersion(std::string version);
 		void setContentType(std::string contentType);
 		void setContentLength(std::string contentLength);
-		void setCGIContentLength(std::string path);
 		void setStatus(struct RouteConfig route);
 		void setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route);
 		void setStatusCode(int statusCode);
@@ -65,16 +63,17 @@ class Response
 		void setConnection(std::string connection, Request &req);
 		void setBody(std::string code, std::string path);
 		std::string handleCGI(Request &req);
+		void setErrorsPages(void);
 
 		// Getters
 		std::string getResponse(void) const ;
 		std::string getStatusCode(void) const ;
+		std::map<int, std::string> getErrorsPages(void) const ;
 
 		// Response
 		void checkOpenFile(std::string path, Request &req, struct RouteConfig route) ;
 		void openDirectory(struct RouteConfig route);
 		void openListTree();
-		void response(std::string request);
 		std::string readFile(std::string code, std::string path);
 		int CGIBodyLength(std::string cgiBody);
 };

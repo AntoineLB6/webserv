@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 14:34:11 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 01:06:36 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig c
 std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig config);
 std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfig config);
 std::string handleForm(Request &req);
-void handleFileUploads(Request &req);
+std::string handleFileUploads(Request &req , struct RouteConfig route, struct WebConfig config, Response &response);
 std::string handleCGI(Request &req, Response &response);
 std::string readFile(std::string code);
-std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config);
+std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config, Response &response);

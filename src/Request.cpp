@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/08 16:01:17 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 02:35:47 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ std::string Request::getContentType(void) const
 	std::map<std::string, std::string> map = getHeaders();
 
 	it = map.find("Content-Type");
-	if (it != map.end() && !it->second.empty())
+	if (it != map.end() && !it->second.empty() && map["Path"].find("cgi-bin") != std::string::npos)
 	{
 		return (map["Content-Type"]);
 	}
@@ -86,6 +86,11 @@ std::string Request::getPort(void) const
 std::string Request::getRequest(void) const
 {
 	return (_request);
+}
+
+std::string Request::getFilename(void) const
+{
+	return (_filename);
 }
 
 void Request::setPort(void)
@@ -169,29 +174,60 @@ void Request::fillHeaders(void)
 {
 	size_t i;
 	size_t pos;
+	size_t loop = 0;
 	std::string tmp;
+	std::string tmpContentType;
 	
 	i = _request.find_first_of('\n');
 	i++;
 	while (1)
 	{
 		pos = _request.find_first_of(':', i);
+		if (_request[i] == '\r')
+		{
+			pos = std::string::npos;
+		}
 		if (pos != std::string::npos)
 		{
 			tmp = _request.substr(i, pos - i);
-			if (_headers["Content-Type"].empty() || tmp != "Content-Type")
-				_headers[tmp] = _request.substr(pos + 2, _request.find_first_of('\r') - i);
+			_headers[tmp] = _request.substr(pos + 2, _request.find_first_of('\r') - i);
 			size_t j = 0;
 			while (_headers[tmp][j] != '\r')
 				j++;
-			if (_headers["Content-Type"].empty() || tmp != "Content-Type")
-				_headers[tmp].erase(j);
+			_headers[tmp].erase(j);
 			i = _request.find_first_of('\r', i);
+			if (tmp == "Content-Type" && !loop)
+			{
+				loop = 1;
+				tmpContentType = _headers[tmp];
+			}
 		}
 		else
 		{
+			_headers["Content-Type"] = tmpContentType;
+			if (_request.size() == 0)
+			{
+				std::cout << "________________________" << std::endl;
+				break ;
+			}
 			if (_headers["Body"].empty())
-				_headers["Body"] = _request.substr(i + 2, _request.find_last_of('\n', i) - 1 - i);
+			{
+				tmpContentType = tmpContentType.substr(0, tmpContentType.find(";"));
+				if (tmpContentType == "multipart/form-data")
+				{
+					_boundary = _request.substr(i + 2, _request.find_first_not_of("-0123456789", i + 2) - i - 2);
+					size_t j = _request.find_first_not_of("-0123456789", i + 2) - i - 2;
+					size_t k = _request.find("filename=", j) + 10;
+					_filename = _request.substr(k, _request.find_first_of("\"", k) - k);
+					k = _request.find_first_of("\"", k) + 3;
+					k += _request.find('\r', k) + 4 - k;
+					_headers["Body"] = _request.substr(k, _request.find('\r', k) - k - 1);
+				}
+				else
+				{
+					_headers["Body"] = _request.substr(i + 2, _request.find_last_of('\n', i) - i - 1);
+				}
+			}
 			break ;
 		}
 		if (_request.substr(i, i + 4) == "\r\n\r\n")
