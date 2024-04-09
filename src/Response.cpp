@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 11:12:03 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/09 14:50:16 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,14 +293,13 @@ std::string Response::readFile(std::string code, std::string path)
 {
 	std::ifstream page;
 	
-	// path.erase(0, 1);
 	if (code == "200")
 		page.open((path).c_str());
 	else
 	{
 		if (this->_errors_pages.find(std::atoi(code.c_str())) != this->_errors_pages.end())
 		{
-			page.open((this->_root + "/" + this->_errors_pages.find(std::atoi(code.c_str()))->second).c_str());
+			page.open((this->_errors_pages.find(std::atoi(code.c_str()))->second).c_str());
 			if (!page.is_open())
 			{
 				page.close();

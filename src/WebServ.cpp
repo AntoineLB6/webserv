@@ -6,7 +6,7 @@
 /*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 11:11:20 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/09 16:07:06 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,21 +63,18 @@ void WebServ::create_server()
         exit(EXIT_FAILURE);
     }
 	
-    if (!this->config.server_name.empty())
-	{
-		if (!this->is_valid_host(config.server_name.c_str()) || (config.port < 0 || config.port >= 65535))
-		{
-			std::cerr << "Error in host & server_name params : " << std::strerror(errno) << std::endl;
-			exit(EXIT_FAILURE);
-		}
-	}
+    // if (!this->config.server_name.empty())
+	// {
+	// 	if (!this->is_valid_host(config.server_name.c_str()) || (config.port < 0 || config.port >= 65535))
+	// 	{
+	// 		std::cerr << "Error in host & server_name params : " << std::strerror(errno) << std::endl;
+	// 		exit(EXIT_FAILURE);
+	// 	}
+	// }
 
 	std::memset(&this->address, 0, sizeof(this->address));
 	this->address.sin_family = AF_INET;
-    if (!this->config.server_name.empty())
-	    this->address.sin_addr.s_addr = inet_addr(this->config.server_name.c_str());
-    else
-		this->address.sin_addr.s_addr = INADDR_ANY;
+	this->address.sin_addr.s_addr = INADDR_ANY;
 	this->address.sin_port = htons(config.port);
 
 	if (bind(this->server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
@@ -233,18 +230,12 @@ std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfi
 {
     Response response(config);
     std::string cgiBody = "";
-    (void)req;
-    (void)route;
-    
 
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
 	{
 		return (getErrorsPages("413", route, config, response));
 	}
     std::string path = route.root + req.getPath();
-    std::string res;
-    std::cout <<  "dfffffffffffffffffffffffffffffffff" << std::endl;
-    std::cout << path << std::endl;
     if (isDirectory(path))
     {
         response.setHeaders(req, 403, cgiBody, route);
@@ -306,7 +297,7 @@ std::string getErrorsPages(std::string code, struct RouteConfig route, struct We
 
     if (config.errors_pages.find(std::atoi(code.c_str())) != config.errors_pages.end())
     {
-        page.open((route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str());
+        page.open((config.errors_pages.find(std::atoi(code.c_str()))->second).c_str());
         std::cout << "PATH: " << (route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str() << std::endl;
         if (!page.is_open())
         {
@@ -341,11 +332,6 @@ int WebServ::getEpollFd() const
 {
 	return (this->epoll_fd);
 }
-
-// long WebServ::getMaxBodySize() const
-// {
-//     return (this->config.client_max_body_size);
-// }
 
 WebConfig WebServ::getConfig() const
 {

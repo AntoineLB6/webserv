@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 01:06:36 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 14:49:50 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,6 @@ class WebServ
 		int getServerFd() const;
 		int getOrCreateSocket();
 		int getEpollFd() const;
-		// long getMaxBodySize() const;
 		WebConfig getConfig() const;
 		void setEpollFd(int epoll);
 		void setConfig(WebConfig &config);

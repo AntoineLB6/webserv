@@ -27,6 +27,7 @@ std::vector<WebConfig> getConfig(std::string path)
 		if (openBracePos != std::string::npos)
 		{
 			currentConfig = line.substr(0, openBracePos);
+            currentConfig = trim(currentConfig);
             if (trigger > 1 && currentConfig != "server")
             {
                 std::cerr << "Error in Config File : " << line << std::endl;

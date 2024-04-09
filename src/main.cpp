@@ -3,14 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 01:23:59 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/09 17:11:52 by aleite-b         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServ.hpp"
+
+void deleteAllConfigs(std::vector<WebConfig>& server_configs)
+{
+    for (std::vector<WebConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
+    {
+        // WebConfig& config = *it;
+        // std::map<std::string, RouteConfig*> routes = config.routes;
+        // for (std::map<std::string, RouteConfig*>::iterator routes_it = routes.begin(); routes_it != routes.end(); ++routes_it)
+        // {
+        //     delete routes_it->second; // Supprimer l'objet pointé
+        // }
+        // routes.clear();
+    }
+}
 
 int	main(int argc, char **argv)
 {
@@ -27,10 +41,22 @@ int	main(int argc, char **argv)
 
     std::vector<WebConfig> server_configs = getConfig(path);
     
+
+
+
+
+
+
+
+
+
+
+    
+    std::cout << "==========================================" << std::endl;
     int i = 1;
     for (std::vector<WebConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
     {
-        std::cout << "Config 1" << std::endl;
+        std::cout << "Config " << std::endl;
         WebConfig config = *it;
 
         std::cout << "Port : " << config.port << std::endl;
@@ -66,7 +92,32 @@ int	main(int argc, char **argv)
             std::cout << std::endl;
         }
         i++;
+        std::cout << std::endl;
+        std::cout << std::endl;
     }
+    
+
+
+
+    for (std::vector<WebConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
+    {
+        WebConfig config = *it;
+        for (std::vector<WebConfig>::iterator it2 = server_configs.begin(); it2 != server_configs.end(); it2++)
+        {
+            WebConfig config2 = *it2;
+            if (it == it2)
+                continue;
+            if (config.server_name == config2.server_name)
+            {
+                deleteAllConfigs(server_configs);
+                std::cerr << "Error same hostnames." << std::endl;
+                exit(EXIT_FAILURE);
+            }
+
+        }
+    }
+
+
     
 
     int epoll_fd = epoll_create(1);
@@ -87,7 +138,6 @@ int	main(int argc, char **argv)
     std::vector<epoll_event> events(20);
     while (true)
     {
-        // std::cout << "------------------ Wait -------------------" << num_events << std::endl;
         num_events = epoll_wait(epoll_fd, events.data(), 20, -1);
         if (num_events == -1) {
             std::cerr << "Error in epoll_wait: " << std::strerror(errno) << std::endl;
@@ -139,14 +189,6 @@ int	main(int argc, char **argv)
             size_t pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
             if ((events[i].events & EPOLLIN))
             {
-                // std::string check_to_read;
-                // if (client_fds[client_fd].getBuffer().empty())
-                //     check_to_read = "";
-                // else
-                //     check_to_read = client_fds[client_fd].getBuffer().substr(pos + 4, client_fds[client_fd].getBuffer().size() + 4);
-                // std::cout << "====== " << check_to_read << std::endl;
-                // if (check_to_read.find("\r\n\r\n") != std::string::npos)
-                // {
                     char buffer[1024] = {0};
                     valread = recv(client_fd, buffer, 1024, MSG_DONTWAIT);
                     if (valread < 1)
@@ -167,20 +209,17 @@ int	main(int argc, char **argv)
                         continue;
                     }
                     client_fds[client_fd].addToBuffer(buffer);
-                    // std::cout << "=========================================================" << std::endl;
+
+
+
+
                     std::cout << buffer << std::endl;
-                    // std::cout << "=========================================================" << std::endl;
     
-                // }
             }
             
             pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
-            //!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0
             if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
             {
-                // std::string check_to_send = client_fds[client_fd].getBuffer().substr(pos + 4, client_fds[client_fd].getBuffer().size() + 4);
-                // if (check_to_send.find("\r\n\r\n") != std::string::npos)
-                // {
                     Request req(client_fds[client_fd].getBuffer());
                     std::string response;
                     for (it = servers.begin(); it != servers.end(); it++)
@@ -230,7 +269,6 @@ int	main(int argc, char **argv)
                         exit(EXIT_FAILURE);
                     }
                     close(client_fd);
-                // }
             }
         }
     }
