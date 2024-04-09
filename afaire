@@ -1,4 +1,6 @@
-cgi in config
+
 post add route.root to path
 
 delete free
+
+File upload sans fichier

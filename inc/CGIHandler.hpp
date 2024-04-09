@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:07:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/03/31 16:37:58 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 00:32:08 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ class CGIHandler
 		CGIHandler& operator=(const CGIHandler &other);
 		~CGIHandler();
 		std::string execute(Request &req);
-		void setCgiEnv(Request &req);
+		void setCgiEnv(Request &req, std::string path);
 		void setCgiPath(std::string path);
 		void printEnv(void) ;
 };

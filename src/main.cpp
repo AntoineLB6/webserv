@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 17:11:52 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/10 00:07:42 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -186,7 +186,7 @@ int	main(int argc, char **argv)
             if (it == servers.end())
                 client_fd = events[i].data.fd;
             
-            size_t pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
+            // size_t pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
             if ((events[i].events & EPOLLIN))
             {
                     char buffer[1024] = {0};
@@ -217,7 +217,7 @@ int	main(int argc, char **argv)
     
             }
             
-            pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
+            // pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
             if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
             {
                     Request req(client_fds[client_fd].getBuffer());

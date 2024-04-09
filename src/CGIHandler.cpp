@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/06 17:30:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 01:02:31 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,15 +38,14 @@ void CGIHandler::setCgiPath(std::string path)
 	this->_cgiPath = path;
 }
 
-void CGIHandler::setCgiEnv(Request &req)
+void CGIHandler::setCgiEnv(Request &req, std::string path)
 {
 	this->_envMap["CONTENT_LENGTH"] = req.getContentLength();
 	this->_envMap["CONTENT_TYPE"] = req.getContentType();
 	// this->_envMap["CONTENT_TYPE"] = "application/x-www-form-urlencoded;charset=utf-8";
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 	this->_envMap["QUERY_STRING"] = req.getBody();
-	std::cout << req.getPath() << std::endl;
-	this->_envMap["SCRIPT_FILENAME"] = req.getPath().substr(1, req.getPath().length() - 1);
+	this->_envMap["SCRIPT_FILENAME"] = path;
 	this->_envMap["SERVER_PORT"] = req.getPort();
 	this->_envMap["REQUEST_METHOD"] = req.getHeaders()["Method"];
 	this->_envMap["SERVER_PROTOCOL"] = req.getHeaders()["Version"];

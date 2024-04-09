@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 02:35:47 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 01:12:27 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -207,7 +207,6 @@ void Request::fillHeaders(void)
 			_headers["Content-Type"] = tmpContentType;
 			if (_request.size() == 0)
 			{
-				std::cout << "________________________" << std::endl;
 				break ;
 			}
 			if (_headers["Body"].empty())

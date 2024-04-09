@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 16:07:06 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/10 01:10:22 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,29 +134,18 @@ std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig c
     Response response(config);
     std::string cgiBody = "";
     std::string rep;
-    // location redirect
-    // location errorPages
-    // location allowedMethods
-    // location root
-    // location uri
-    // location index
-    // init un objet location
+    std::string tempPath;
+
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
-	{
 		return (getErrorsPages("413", route, config, response));
-	}
     if (req.getPath() != "/")
     {
-        // check allowed methods => 405
-        if (req.getPath().find("cgi-bin") != std::string::npos)
-        {
-            cgiBody = handleCGI(req, response);
-        }
+        tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
+        if (config.routes.find(tempPath + ".php") != config.routes.end())
+            cgiBody = handleCGI(req, response, route);
     }
-    if (req.getPath().find("cgi-bin") != std::string::npos)
-    {
+    if (config.routes.find(tempPath + ".php") != config.routes.end())
         response.setHeaders(req, 1, cgiBody, route);
-    }
     else
         response.setHeaders(req, 0, cgiBody, route);
     if (!cgiBody.empty())
@@ -171,32 +160,23 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     Response response(config);
     std::string cgiBody = "";
     std::string rep;
+    std::string tempPath;
     
     response.setStatus(route);
 	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
-	{
 		return (getErrorsPages("413", route, config, response));
-	}
     if (req.getPath() != "/")
     {
-        // check allowed methods => 405
-        // check max body size => 413
-        if (req.getPath().find("cgi-bin") != std::string::npos)
-        {
-            cgiBody = handleCGI(req, response);
-        }
+        tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
+        if (config.routes.find(tempPath + ".php") != config.routes.end())
+            cgiBody = handleCGI(req, response, route);
     }
-    if (req.getPath().find("cgi-bin") != std::string::npos)
-    {
+    if (config.routes.find(tempPath + ".php") != config.routes.end())
         response.setHeaders(req, 1, cgiBody, route);
-    }
     else
         response.setHeaders(req, 0, cgiBody, route);
     if (!cgiBody.empty())
-    {
         rep = response.getResponse() + cgiBody;
-        // return (rep);
-    }
     else
         rep = response.getResponse();
     if (response.getStatusCode() == "200")
@@ -279,9 +259,9 @@ std::string handleFileUploads(Request &req, struct RouteConfig route, struct Web
     return (rep);
 }
 
-std::string handleCGI(Request &req, Response &response)
+std::string handleCGI(Request &req, Response &response, struct RouteConfig route)
 {
-    std::string body = response.handleCGI(req);
+    std::string body = response.handleCGI(req, route);
     
     if (body.empty())
     {

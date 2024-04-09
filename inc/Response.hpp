@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 10:50:36 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/10 00:27:18 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ class Response
 		void setServer(std::string serverName);
 		void setConnection(std::string connection, Request &req);
 		void setBody(std::string code, std::string path);
-		std::string handleCGI(Request &req);
+		std::string handleCGI(Request &req, struct RouteConfig route);
 		void setErrorsPages(void);
 
 		// Getters

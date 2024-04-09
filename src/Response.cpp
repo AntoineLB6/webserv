@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/09 14:50:16 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/10 01:08:04 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -321,11 +321,10 @@ std::string Response::readFile(std::string code, std::string path)
 	return (body);
 }
 
-std::string Response::handleCGI(Request &req)
+std::string Response::handleCGI(Request &req, struct RouteConfig route)
 {
-	std::string path = req.getPath();
-	_cgi.setCgiPath(path);
-	_cgi.setCgiEnv(req);
+	std::string path = route.root + req.getPath();
+	_cgi.setCgiEnv(req, path);
 	return (_cgi.execute(req));
 }
 
