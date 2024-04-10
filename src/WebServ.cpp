@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:18:35 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 15:59:43 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 #include "CGIHandler.hpp"
 #include "Request.hpp"
 
-WebServ::WebServ(struct WebConfig& config, int epoll_fd_to_set) : config(config)
+WebServ::WebServ(ServerConfig& config, int epoll_fd_to_set, std::vector<WebServ *> servers) : config(config), servers(servers)
 {
     this->epoll_fd = epoll_fd_to_set;
     this->create_server();
@@ -27,7 +27,7 @@ WebServ::~WebServ()
 	
 }
 
-WebServ::WebServ(const WebServ &cpyWebServ): server_fd(cpyWebServ.server_fd), address(cpyWebServ.address)
+WebServ::WebServ(const WebServ &cpyWebServ): server_fd(cpyWebServ.server_fd), address(cpyWebServ.address), config(cpyWebServ.config)
 {
 
 }
@@ -47,19 +47,22 @@ void WebServ::create_server()
 	if ((this->server_fd = socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK, 0)) < 0)
 	{
 		std::cerr << "Error Socket : " << std::strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
+		freeAll(this->servers);
+        exit(EXIT_FAILURE);
 	}
     
     const int enable = 1;
     if (setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 	{
 		std::cerr << "Error Socket Option : " << std::strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
+		freeAll(this->servers);
+        exit(EXIT_FAILURE);
 	}
 
     if (fcntl(this->server_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         std::cerr << "Error Setting Socket Flags : " << std::strerror(errno) << std::endl;
+        freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
 	
@@ -75,18 +78,20 @@ void WebServ::create_server()
 	std::memset(&this->address, 0, sizeof(this->address));
 	this->address.sin_family = AF_INET;
 	this->address.sin_addr.s_addr = INADDR_ANY;
-	this->address.sin_port = htons(config.port);
+	this->address.sin_port = htons(config.getPort());
 
 	if (bind(this->server_fd, (struct sockaddr *)&this->address, sizeof(this->address)) < 0)
 	{
 		std::cerr << "Error Binding : " << std::strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
+		freeAll(this->servers);
+        exit(EXIT_FAILURE);
 	}
 
 	if (listen(this->server_fd, 100) < 0)
 	{
 		std::cerr << "Error Listening : " << std::strerror(errno) << std::endl;
-		exit(EXIT_FAILURE);
+		freeAll(this->servers);
+        exit(EXIT_FAILURE);
 	}
 }
 
@@ -97,6 +102,7 @@ void WebServ::create_epoll()
     if (epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, this->server_fd, &this->event) == -1)
     {
         std::cerr << "Error Adding Epoll : " << std::strerror(errno) << std::endl;
+        freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
 }
@@ -108,11 +114,13 @@ int WebServ::create_client()
 
     if ((client_fd = accept(this->server_fd, (struct sockaddr *)&this->address, (socklen_t *)&addrlen)) < 0) {
         std::cerr << "Error Accepting : " << std::strerror(errno) << std::endl;
+        freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
 
     if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Error Setting Socket Flags client : " << std::strerror(errno) << std::endl;
+        freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
 
@@ -124,27 +132,28 @@ int WebServ::create_client()
     if (epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, client_fd, &client_event) < 0)
     {
         std::cerr << "Error Accepting EPOLL : " << std::strerror(errno) << std::endl;
+        freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
     return client_fd;
 }
 
-std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig config)
+std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
 {
     Response response(config);
     std::string cgiBody = "";
     std::string rep;
     std::string tempPath;
 
-	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	if (static_cast<long>(req.getBody().size()) > route.getClientMaxBodySize())
 		return (getErrorsPages("413", route, config, response));
     if (req.getPath() != "/")
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
-        if (config.routes.find(tempPath + ".php") != config.routes.end())
+        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
             cgiBody = handleCGI(req, response, route);
     }
-    if (config.routes.find(tempPath + ".php") != config.routes.end())
+    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
         response.setHeaders(req, 1, cgiBody, route);
     else
         response.setHeaders(req, 0, cgiBody, route);
@@ -155,7 +164,7 @@ std::string handleGET(Request &req, struct RouteConfig route, struct WebConfig c
     return (rep);
 }
 
-std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig config)
+std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
 {
     Response response(config);
     std::string cgiBody = "";
@@ -163,15 +172,15 @@ std::string handlePOST(Request &req, struct RouteConfig route, struct WebConfig 
     std::string tempPath;
     
     response.setStatus(route);
-	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	if (static_cast<long>(req.getBody().size()) > route.getClientMaxBodySize())
 		return (getErrorsPages("413", route, config, response));
     if (req.getPath() != "/")
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
-        if (config.routes.find(tempPath + ".php") != config.routes.end())
+        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
             cgiBody = handleCGI(req, response, route);
     }
-    if (config.routes.find(tempPath + ".php") != config.routes.end())
+    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
         response.setHeaders(req, 1, cgiBody, route);
     else
         response.setHeaders(req, 0, cgiBody, route);
@@ -206,16 +215,16 @@ bool isDirectory(const std::string& path)
 	return S_ISDIR(info.st_mode);
 }
 
-std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfig config)
+std::string handleDELETE(Request &req, RouteConfig route, ServerConfig config)
 {
     Response response(config);
     std::string cgiBody = "";
 
-	if (static_cast<long>(req.getBody().size()) > route.client_max_body_size)
+	if (static_cast<long>(req.getBody().size()) > route.getClientMaxBodySize())
 	{
 		return (getErrorsPages("413", route, config, response));
 	}
-    std::string path = route.root + req.getPath();
+    std::string path = route.getRoot() + req.getPath();
     if (isDirectory(path))
     {
         response.setHeaders(req, 403, cgiBody, route);
@@ -235,7 +244,7 @@ std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfi
 
 std::string handleFileUploads(Request &req, struct RouteConfig route, struct WebConfig config, Response &response)
 {
-    std::ofstream outfile((route.client_body_temp_path + req.getFilename()).c_str());
+    std::ofstream outfile((route.getClientBodyTempPath() + req.getFilename()).c_str());
     std::string rep;
 
     if (req.getFilename().empty() || req.getFilename().length() == 0)
@@ -255,7 +264,7 @@ std::string handleFileUploads(Request &req, struct RouteConfig route, struct Web
     return (rep);
 }
 
-std::string handleCGI(Request &req, Response &response, struct RouteConfig route)
+std::string handleCGI(Request &req, Response &response, RouteConfig route)
 {
     std::string body = response.handleCGI(req, route);
     
@@ -267,14 +276,14 @@ std::string handleCGI(Request &req, Response &response, struct RouteConfig route
     return (body);
 }
 
-std::string getErrorsPages(std::string code, struct RouteConfig route, struct WebConfig config, Response &response)
+std::string getErrorsPages(std::string code, RouteConfig route, ServerConfig config, Response &response)
 {
     std::ifstream page;
 
-    if (config.errors_pages.find(std::atoi(code.c_str())) != config.errors_pages.end())
+    if (config.getErrorsPages().find(std::atoi(code.c_str())) != config.getErrorsPages().end())
     {
-        page.open((config.errors_pages.find(std::atoi(code.c_str()))->second).c_str());
-        std::cout << "PATH: " << (route.root + "/" + config.errors_pages.find(std::atoi(code.c_str()))->second).c_str() << std::endl;
+        page.open((config.getErrorsPages().find(std::atoi(code.c_str()))->second).c_str());
+        std::cout << "PATH: " << (route.getRoot() + "/" + config.getErrorsPages().find(std::atoi(code.c_str()))->second).c_str() << std::endl;
         if (!page.is_open())
         {
             page.close();
@@ -309,7 +318,7 @@ int WebServ::getEpollFd() const
 	return (this->epoll_fd);
 }
 
-WebConfig WebServ::getConfig() const
+ServerConfig WebServ::getConfig()
 {
 	return (this->config);
 }
@@ -319,7 +328,7 @@ void WebServ::setEpollFd(int epoll)
     this->epoll_fd = epoll;
 }
 
-void WebServ::setConfig(WebConfig &config)
+void WebServ::setConfig(ServerConfig &config)
 {
     this->config = config;
 }

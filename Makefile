@@ -2,11 +2,13 @@ CC = c++
 
 FLAGS = -Wall -Wextra -Werror -std=c++98 -g3
 
-SRCS = src/Response.cpp \
+SRCS =  src/main.cpp \
+		src/config.cpp \
+		src/ServerConfig.cpp \
+		src/RouteConfig.cpp \
+		src/Response.cpp \
 		src/Socket.cpp \
 		src/WebServ.cpp \
-		src/config.cpp \
-		src/main.cpp \
 		src/Request.cpp \
 		src/AutoIndex.cpp \
 		src/CGIHandler.cpp

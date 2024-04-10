@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 13:50:28 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 15:59:26 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ Response::Response(): _is_dir(false), _is_autoindex(false)
 }
 
 
-Response::Response(struct WebConfig config): _is_dir(false), _is_autoindex(false)
+Response::Response(ServerConfig config): _is_dir(false), _is_autoindex(false)
 {
 	setErrorsPages();
-	for (std::map<int, std::string>::iterator it = config.errors_pages.begin(); it != config.errors_pages.end(); ++it)
+	for (std::map<int, std::string>::iterator it = config.getErrorsPages().begin(); it != config.getErrorsPages().end(); ++it)
 	{
 		this->_errors_pages[it->first] = it->second;
 	}
@@ -54,17 +54,17 @@ void Response::setStatusCode(int statusCode)
 	this->_statusCode = statusCode;
 }
 
-void Response::setStatus(struct RouteConfig route)
+void Response::setStatus(RouteConfig route)
 {
-	for (std::map<int, std::string>::iterator it = route.return_codes.begin(); it != route.return_codes.end(); it++)
+	for (std::map<int, std::string>::iterator it = route.getReturnCodes().begin(); it != route.getReturnCodes().end(); it++)
 	{
 		this->_errors_pages[it->first] = it->second;
 	}
 }
 
-void Response::setHeaders(Request &req, int flag, std::string cgiBody, struct RouteConfig route)
+void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route)
 {
-	this->_root = route.root;
+	this->_root = route.getRoot();
 	this->setStatus(route);
 	checkOpenFile(req.getPath(), req, route);
 	if (req.getMethod() == "DELETE")
@@ -195,9 +195,9 @@ void Response::openListTree()
 	this->_response += str;
 }
 
-void Response::openDirectory(struct RouteConfig route)
+void Response::openDirectory(RouteConfig route)
 {
-	this->_response += "HTTP/1.1 301 " + this->_errors_pages.find(301)->second + "\nLocation: ./" + route.default_page + "\nContent-Length: 0\nConnection: close\n\n";
+	this->_response += "HTTP/1.1 301 " + this->_errors_pages.find(301)->second + "\nLocation: ./" + route.getDefaultPage() + "\nContent-Length: 0\nConnection: close\n\n";
 }
 
 void Response::getDeleteRes(int flag)
@@ -246,11 +246,11 @@ int isDirectoryOrIndex(const std::string& path)
     return S_ISDIR(info.st_mode);
 }
 
-void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig route)
+void Response::checkOpenFile(std::string path, Request &req, RouteConfig route)
 {
 	std::ifstream page;
 	
-	path = route.root + path;
+	path = route.getRoot() + path;
 	this->_path = path;
 	if (isDirectoryOrIndex(this->_path) == -1)
 	{
@@ -259,7 +259,7 @@ void Response::checkOpenFile(std::string path, Request &req, struct RouteConfig 
 	}
 	else if (isDirectoryOrIndex(this->_path) > 0)
 	{
-		if (route.autoindex)
+		if (route.getAutoindex())
 			this->_is_autoindex = true;
 		else
 			this->_is_dir = true;
@@ -321,9 +321,9 @@ std::string Response::readFile(std::string code, std::string path)
 	return (body);
 }
 
-std::string Response::handleCGI(Request &req, struct RouteConfig route)
+std::string Response::handleCGI(Request &req, RouteConfig route)
 {
-	std::string path = route.root + req.getPath();
+	std::string path = route.getRoot() + req.getPath();
 	_cgi.setCgiEnv(req, path);
 	return (_cgi.execute(req));
 }
