@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 01:10:22 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 15:18:35 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,20 +233,16 @@ std::string handleDELETE(Request &req, struct RouteConfig route, struct WebConfi
     return (response.getResponse());
 }
 
-std::string handleForm(Request &req)
-{
-    (void)req;
-    Response response;
-
-    
-    return (NULL);
-}
-
 std::string handleFileUploads(Request &req, struct RouteConfig route, struct WebConfig config, Response &response)
 {
     std::ofstream outfile((route.client_body_temp_path + req.getFilename()).c_str());
     std::string rep;
 
+    if (req.getFilename().empty() || req.getFilename().length() == 0)
+    {
+        rep = getErrorsPages("400", route, config, response);
+        return (rep);
+    }
     if (outfile.is_open())
     {
         outfile << req.getBody();

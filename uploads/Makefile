@@ -7,7 +7,7 @@ SRCS = src/Response.cpp \
 		src/WebServ.cpp \
 		src/config.cpp \
 		src/main.cpp \
-		src/Request.cpp \
+		src/Request.PYbq´cpp \
 		src/AutoIndex.cpp \
 		src/CGIHandler.cpp
 

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 01:12:27 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 15:57:39 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ std::string Request::getContentType(void) const
 	std::map<std::string, std::string> map = getHeaders();
 
 	it = map.find("Content-Type");
-	if (it != map.end() && !it->second.empty() && map["Path"].find("cgi-bin") != std::string::npos)
+	if (it != map.end() && !it->second.empty() && map["Path"].find("cgi-bin") == std::string::npos)
 	{
 		return (map["Content-Type"]);
 	}
@@ -184,9 +184,7 @@ void Request::fillHeaders(void)
 	{
 		pos = _request.find_first_of(':', i);
 		if (_request[i] == '\r')
-		{
 			pos = std::string::npos;
-		}
 		if (pos != std::string::npos)
 		{
 			tmp = _request.substr(i, pos - i);
@@ -218,6 +216,10 @@ void Request::fillHeaders(void)
 					size_t j = _request.find_first_not_of("-0123456789", i + 2) - i - 2;
 					size_t k = _request.find("filename=", j) + 10;
 					_filename = _request.substr(k, _request.find_first_of("\"", k) - k);
+					if (_filename.empty())
+					{
+						break;
+					}
 					k = _request.find_first_of("\"", k) + 3;
 					k += _request.find('\r', k) + 4 - k;
 					_headers["Body"] = _request.substr(k, _request.find('\r', k) - k - 1);

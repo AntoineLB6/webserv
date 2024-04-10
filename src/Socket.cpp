@@ -57,5 +57,7 @@ clock_t Socket::getTime() const
 
 void Socket::addToBuffer(char *bufferToAdd)
 {
-	this->buffer += bufferToAdd;
+	std::string tmp = bufferToAdd;
+	std::cout << "SIZE TMP: " << tmp.size() << std::endl;
+	this->buffer += tmp;
 }
