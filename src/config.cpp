@@ -1,6 +1,6 @@
 #include "../inc/main.hpp"
 
-std::vector<WebConfig> getConfig(std::string path)
+void getConfig(std::string path, std::vector<ServerConfig> &server_configs)
 {
 	std::ifstream file(path.c_str());
 	if (!file)
@@ -10,10 +10,8 @@ std::vector<WebConfig> getConfig(std::string path)
 	}
 	std::string line;
 	std::string currentConfig;
-    std::vector<WebConfig> server_configs;
-    struct WebConfig config;
+    ServerConfig config;
     int trigger = 0;
-    config = defaultConfig(config);
 	while (std::getline(file, line))
 	{
         line = trim(line);
@@ -35,9 +33,9 @@ std::vector<WebConfig> getConfig(std::string path)
             }
             else if (currentConfig == "server")
             {
-                struct WebConfig new_config;
-                new_config = defaultConfig(new_config);
+                ServerConfig new_config;
                 config = new_config;
+                config.clear();
             }
             trigger++;
 			std::cout << "Configuration: " << currentConfig << std::endl;
@@ -57,19 +55,19 @@ std::vector<WebConfig> getConfig(std::string path)
             else
             {
                 currentConfig = "end";
-                if (config.routes.empty())
+                if (config.isRouteEmpty())
                 {
-                    struct RouteConfig *route = new RouteConfig;
-                    defaultRoute(route);
-                    config.routes.insert(std::make_pair("/", *route));
+                    RouteConfig route;
+                    config.insertRoute("/", route);
                 }
-                for (std::map<std::string, RouteConfig>::iterator it = config.routes.begin(); it != config.routes.end(); it++)
+                for (std::map<std::string, RouteConfig>::iterator it = config.getRoutes().begin(); it != config.getRoutes().end(); it++)
                 {
                     RouteConfig& route = it->second;
-                    if (route.limit_except_accepted.empty())
-                        route.limit_except_accepted.push_back("GET");
+                    if (route.isMethodsEmpty())
+                        route.addOneMethod("GET");
                 }
-                server_configs.push_back(config);
+                ServerConfig push_config(config);
+                server_configs.push_back(push_config);
             }
 			continue ;
 		}
@@ -82,51 +80,35 @@ std::vector<WebConfig> getConfig(std::string path)
 			if (tokens.size() == 2 && tokens[0] != "limit_except" && tokens[0] != "return")
             {
 				std::cout << "Argument: " << tokens[0] << ", Valeur: " << tokens[1] << std::endl;
-                put_setting(tokens[0], tokens[1], currentConfig, &config);
+                put_setting(tokens[0], tokens[1], currentConfig, config);
             }
             else if (tokens.size() == 3 && tokens[0] == "return")
             {
-                put_setting_return(tokens, currentConfig, &config);
+                put_setting_return(tokens, currentConfig, config);
             }
             else if (tokens.size() == 3 && tokens[0] == "error_page")
             {
-                put_setting_error_page(tokens, currentConfig, &config);
+                put_setting_error_page(tokens, currentConfig, config);
             }
             else if (tokens.size() >= 2 && tokens[0] == "limit_except")
             {
-                put_setting_http(tokens, currentConfig, &config);
+                put_setting_http(tokens, currentConfig, config);
             }
             else
             {
-                std::cerr << "Error in Config File1 : " << line << std::endl;
+                std::cerr << "Error in Config File : " << line << std::endl;
                 exit(EXIT_FAILURE);
             }
 		}
 	}
     if (trigger)
     {
-        std::cerr << "Error in Config File2 : " << "not closed" << std::endl;
+        std::cerr << "Error in Config File : " << "not closed" << std::endl;
         exit(EXIT_FAILURE);
     }
 	file.close();
-	return server_configs;
 }
 
-void defaultRoute(struct RouteConfig *route_config)
-{
-    route_config->root = "./pages";
-    route_config->autoindex = true;
-    route_config->default_page = "index.html";
-    route_config->client_body_temp_path = "/var/www/uploads/";
-    route_config->client_max_body_size = 1024;
-}
-
-struct WebConfig defaultConfig(struct WebConfig config)
-{
-    config.port = 8080;
-    config.server_name = "";
-    return (config);
-}
 
 std::string trim(const std::string& str)
 {
@@ -153,142 +135,115 @@ std::vector<std::string> split(const std::string &s, char delimiter)
 	return (tokens);
 }
 
-void put_setting(std::string key, std::string value, std::string currentConfig, struct WebConfig *config)
+void put_setting(std::string key, std::string value, std::string currentConfig, ServerConfig &config)
 {
     std::vector<std::string> config_words = split(currentConfig, ' ');
     if (config_words[0] == "server")
     {
         if (key == "listen")
-            config->port = std::atoi(value.c_str());
+            config.setPort(std::atoi(value.c_str()));
         else if (key == "server_name")
-            config->server_name = value;
+            config.setServerName(value);
         else
         {
-            std::cerr << "Error in Config File3 : " << key << std::endl;
+            std::cerr << "Error in Config File : " << key << std::endl;
             exit(EXIT_FAILURE);
         }
         
     }
     else if (config_words[0] == "location")
     {
-        struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) == config->routes.end())
-        {
-            route = new RouteConfig;
-            defaultRoute(route);
-            config->routes.insert(std::make_pair(config_words[1], *route));
-        }
-        route = &config->routes.find(config_words[1])->second;
-        if (key == "limit_except")
-            config->port = std::atoi(value.c_str());
-        else if (key == "return")
-            config->server_name = value;
-        else if (key == "root")
-            route->root = value;
-        else if (key == "autoindex")
-            value == "on" ? route->autoindex = true : route->autoindex = false;
+        RouteConfig &route = config.getOrSetRoute(config_words[1]);
+        if (key == "root")
+            route.setRoot(value);
+        else if (key == "autoindex" && (value == "on" || value == "off"))
+            value == "on" ? route.setAutoindex(true) : route.setAutoindex(false);
         else if (key == "default")
-            route->default_page = value;
+            route.setDefault(value);
         else if (key == "client_body_temp_path")
-            route->client_body_temp_path = value;
+            route.setClientBodyTempPath(value);
         else if (key == "client_max_body_size")
-            route->client_max_body_size = std::atol(value.c_str());
+            route.setClientMaxBodySize(std::atol(value.c_str()));
         else
         {
-            std::cerr << "Error in Config File4 : " << key << std::endl;
+            std::cerr << "Error in Config File : " << key << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File5 : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
 
-void put_setting_return(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config)
+void put_setting_return(std::vector<std::string> tokens, std::string currentConfig, ServerConfig &config)
 {
     std::vector<std::string> config_words = split(currentConfig, ' ');
     if (config_words[0] == "location")
     {
-        struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) == config->routes.end())
-        {
-            route = new RouteConfig;
-            defaultRoute(route);
-            config->routes.insert(std::make_pair(config_words[1], *route));
-        }
-        route = &config->routes.find(config_words[1])->second;
-        
+        RouteConfig &route = config.getOrSetRoute(config_words[1]);
         if (tokens[0] == "return")
         {
-            route->return_codes[std::atoi(tokens[1].c_str())] = tokens[2];
+            route.setOneReturnCode(std::atoi(tokens[1].c_str()), tokens[2]);
         }
         else
         {
-            std::cerr << "Error in Config File6 : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File7 : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
 
-void put_setting_http(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config)
+void put_setting_http(std::vector<std::string> tokens, std::string currentConfig, ServerConfig &config)
 {
     std::vector<std::string> config_words = split(currentConfig, ' ');
     if (config_words[0] == "location")
     {
-        struct RouteConfig *route = NULL;
-        if (config->routes.find(config_words[1]) == config->routes.end())
-        {
-            route = new RouteConfig;
-            defaultRoute(route);
-            config->routes.insert(std::make_pair(config_words[1], *route));
-        }
-        route = &config->routes.find(config_words[1])->second;
-        
+        RouteConfig &route = config.getOrSetRoute(config_words[1]);
         if (tokens[0] == "limit_except")
         {
             for (size_t i = 1; i < tokens.size(); i++)
             {
-                route->limit_except_accepted.push_back(tokens[i]);
+                route.addOneMethod(tokens[i]);
             }
         }
         else
         {
-            std::cerr << "Error in Config File8 : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File9 : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
 
-void put_setting_error_page(std::vector<std::string> tokens, std::string currentConfig, struct WebConfig *config)
+void put_setting_error_page(std::vector<std::string> tokens, std::string currentConfig, ServerConfig &config)
 {
     std::vector<std::string> config_words = split(currentConfig, ' ');
     if (config_words[0] != "location")
     {
         if (tokens[0] == "error_page")
         {
-            config->errors_pages.insert(std::make_pair(std::atoi(tokens[1].c_str()), tokens[2]));
+            config.setOneErrorPage(std::atoi(tokens[1].c_str()), tokens[2]);
         }
         else
         {
-            std::cerr << "Error in Config File10 : " << tokens[0] << std::endl;
+            std::cerr << "Error in Config File : " << tokens[0] << std::endl;
             exit(EXIT_FAILURE);
         }
     }
     else
     {
-        std::cerr << "Error in Config File11 : " << currentConfig << std::endl;
+        std::cerr << "Error in Config File : " << currentConfig << std::endl;
         exit(EXIT_FAILURE);
     }
 }
