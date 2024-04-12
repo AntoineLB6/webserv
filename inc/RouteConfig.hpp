@@ -1,9 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteConfig.hpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/13 01:18:33 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/13 01:18:35 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #pragma once
 
 #include <string>
 #include <time.h>
 #include <map>
 #include <vector>
+#include "main.hpp"
 
 class RouteConfig
 {

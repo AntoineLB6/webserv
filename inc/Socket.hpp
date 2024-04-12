@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 15:38:16 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:38:23 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/10 16:30:26 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <string>
 #include <time.h>
 #include <iostream>
+#include "main.hpp"
 
 class Socket
 {

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   RouteConfig.cpp                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/13 01:17:49 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/13 01:17:51 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "RouteConfig.hpp"
 
 RouteConfig::RouteConfig(): root("./pages"), autoindex(true), default_page("index.html"), client_body_temp_path("./uploads"), client_max_body_size(1024)

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Socket.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/13 01:17:36 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/13 01:17:38 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Socket.hpp"
 
 Socket::Socket(): fd(-1), server_fd(-1), buffer("")
@@ -57,7 +69,5 @@ clock_t Socket::getTime() const
 
 void Socket::addToBuffer(char *bufferToAdd)
 {
-	std::string tmp = bufferToAdd;
-	std::cout << "SIZE TMP: " << tmp.size() << std::endl;
-	this->buffer += tmp;
+	this->buffer += bufferToAdd;
 }

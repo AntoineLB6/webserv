@@ -6,14 +6,11 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:59:43 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 01:00:28 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Response.hpp"
 #include "WebServ.hpp"
-#include "CGIHandler.hpp"
-#include "Request.hpp"
 
 WebServ::WebServ(ServerConfig& config, int epoll_fd_to_set, std::vector<WebServ *> servers) : config(config), servers(servers)
 {
@@ -150,17 +147,25 @@ std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
     if (req.getPath() != "/")
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
-        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
-            cgiBody = handleCGI(req, response, route);
+        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+            cgiBody = handleCGI(req, response, route, config);
+        else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        {
+            return (getErrorsPages("501", route, config, response));
+        }
     }
-    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
-        response.setHeaders(req, 1, cgiBody, route);
+    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        response.setHeaders(req, 1, cgiBody, route, config);
     else
-        response.setHeaders(req, 0, cgiBody, route);
+        response.setHeaders(req, 0, cgiBody, route, config);
     if (!cgiBody.empty())
         rep = response.getResponse() + cgiBody;
     else
         rep = response.getResponse();
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDMAGENTA << "server : "
+            << BOLDWHITE << ">> " << BOLDMAGENTA << "[status: " << response.getStatusCode() 
+            << " " << response.getErrorsPages()[std::atoi(response.getStatusCode().c_str())]
+            << "] [length: " << contentLength(response) << "]" << RESET << std::endl;
     return (rep);
 }
 
@@ -177,20 +182,28 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
     if (req.getPath() != "/")
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
-        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
-            cgiBody = handleCGI(req, response, route);
+        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        {
+            cgiBody = handleCGI(req, response, route, config);
+        }
+        else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        {
+            return (getErrorsPages("501", route, config, response));
+        }
     }
-    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end())
-        response.setHeaders(req, 1, cgiBody, route);
+    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        response.setHeaders(req, 1, cgiBody, route, config);
     else
-        response.setHeaders(req, 0, cgiBody, route);
+    {
+        response.setHeaders(req, 0, cgiBody, route, config);
+    }
     if (!cgiBody.empty())
         rep = response.getResponse() + cgiBody;
     else
         rep = response.getResponse();
     if (response.getStatusCode() == "200")
     {
-        std::string contentType = req.getContentType();
+        std::string contentType = req.getContentType(config);
         contentType = contentType.substr(0, contentType.find(";"));
         if (contentType == "multipart/form-data")
         {
@@ -199,6 +212,10 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
                 rep = uploadRep;
         }
     }
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDMAGENTA << "server : "
+            << BOLDWHITE << ">> " << BOLDMAGENTA << "[status: " << response.getStatusCode() 
+            << " " << response.getErrorsPages()[std::atoi(response.getStatusCode().c_str())]
+            << "] [length: " << contentLength(response) << "]" << RESET << std::endl;
     return (rep);
 }
 
@@ -227,22 +244,26 @@ std::string handleDELETE(Request &req, RouteConfig route, ServerConfig config)
     std::string path = route.getRoot() + req.getPath();
     if (isDirectory(path))
     {
-        response.setHeaders(req, 403, cgiBody, route);
+        response.setHeaders(req, 403, cgiBody, route, config);
     }
     else
     {
         if (std::remove(path.c_str()) != 0)
         {
-            response.setHeaders(req, 404, cgiBody, route);
+            response.setHeaders(req, 404, cgiBody, route, config);
         } else
         {
-            response.setHeaders(req, 200, cgiBody, route);
+            response.setHeaders(req, 200, cgiBody, route, config);
         }
     }
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDMAGENTA << "server : "
+            << BOLDWHITE << ">> " << BOLDMAGENTA << "[status: " << response.getStatusCode() 
+            << " " << response.getErrorsPages()[std::atoi(response.getStatusCode().c_str())]
+            << "] [length: " << contentLength(response) << "]" << RESET << std::endl;
     return (response.getResponse());
 }
 
-std::string handleFileUploads(Request &req, struct RouteConfig route, struct WebConfig config, Response &response)
+std::string handleFileUploads(Request &req, RouteConfig route, ServerConfig config, Response &response)
 {
     std::ofstream outfile((route.getClientBodyTempPath() + req.getFilename()).c_str());
     std::string rep;
@@ -264,9 +285,9 @@ std::string handleFileUploads(Request &req, struct RouteConfig route, struct Web
     return (rep);
 }
 
-std::string handleCGI(Request &req, Response &response, RouteConfig route)
+std::string handleCGI(Request &req, Response &response, RouteConfig route, ServerConfig config)
 {
-    std::string body = response.handleCGI(req, route);
+    std::string body = response.handleCGI(req, route, config);
     
     if (body.empty())
     {
@@ -279,11 +300,11 @@ std::string handleCGI(Request &req, Response &response, RouteConfig route)
 std::string getErrorsPages(std::string code, RouteConfig route, ServerConfig config, Response &response)
 {
     std::ifstream page;
+    (void)route;
 
     if (config.getErrorsPages().find(std::atoi(code.c_str())) != config.getErrorsPages().end())
     {
         page.open((config.getErrorsPages().find(std::atoi(code.c_str()))->second).c_str());
-        std::cout << "PATH: " << (route.getRoot() + "/" + config.getErrorsPages().find(std::atoi(code.c_str()))->second).c_str() << std::endl;
         if (!page.is_open())
         {
             page.close();
@@ -306,6 +327,26 @@ std::string getErrorsPages(std::string code, RouteConfig route, ServerConfig con
     rep += body;
     page.close();
     return (rep);
+}
+
+std::string contentLength(Response &response)
+{
+    if (response.getContentLength() == "0")
+        return (response.getTreeLength());
+    return (response.getContentLength());
+}
+
+std::string getDisplayDate(void)
+{
+    time_t now = time(0);
+	struct tm tstruct;
+	char buffer[80];
+
+	tstruct = *localtime(&now);
+	strftime(buffer, sizeof(buffer), "%H:%M:%S", &tstruct);
+	std::stringstream ss;
+	ss << buffer;
+    return (ss.str());
 }
 
 int WebServ::getServerFd() const

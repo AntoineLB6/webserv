@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:59:01 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 01:15:06 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,24 +46,12 @@ int	main(int argc, char **argv)
     std::vector<ServerConfig> server_configs;
     
     getConfig(path, server_configs);
-    
-
-
-
-
-
-
-
-
-
-
-    
-    std::cout << "==========================================" << std::endl;
     int i = 1;
     for (std::vector<ServerConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
     {
         ServerConfig config = *it;
-        std::cout << "Config " << config.getRoutes().size() << std::endl;
+        std::cout << "================================" << std::endl;
+        std::cout << "Server Config " << i << std::endl;
 
         std::cout << "Port : " << config.getPort() << std::endl;
         std::cout << "Server Name : " << config.getServerName() << std::endl;
@@ -78,8 +66,8 @@ int	main(int argc, char **argv)
         for (std::map<std::string, RouteConfig>::iterator it = config.getRoutes().begin(); it != config.getRoutes().end(); it++)
         {
             RouteConfig route = it->second;
-            std::cout << "==== Chemin : " << it->first << std::endl;
-            std::cout << "--Returned Codes : ";
+            std::cout << "Routes : " << it->first << std::endl;
+            std::cout << "Returned Codes : ";
             for (std::map<int, std::string>::iterator it = route.getReturnCodes().begin(); it != route.getReturnCodes().end(); ++it)
             {
                 std::cout << it->first << " " << it->second << " | ";
@@ -93,15 +81,14 @@ int	main(int argc, char **argv)
             std::cout << "Allowed Methods : ";
             for (std::vector<std::string>::iterator it = route.getLimitExceptAccepted().begin(); it != route.getLimitExceptAccepted().end(); it++)
             {
-                std::cout << *it;
+                std::cout << *it << " ";
             }
             std::cout << std::endl;
         }
         i++;
-        std::cout << std::endl;
+        std::cout << "================================" << std::endl;
         std::cout << std::endl;
     }
-
 
     for (std::vector<ServerConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
     {
@@ -119,10 +106,6 @@ int	main(int argc, char **argv)
 
         }
     }
-
-
-    
-
     int epoll_fd = epoll_create(1);
     if (epoll_fd == -1) {
         std::cerr << "Error creating epoll: " << std::strerror(errno) << std::endl;
@@ -188,8 +171,6 @@ int	main(int argc, char **argv)
             }
             if (it == servers.end())
                 client_fd = events[i].data.fd;
-            
-            // size_t pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
             if ((events[i].events & EPOLLIN))
             {
                     char buffer[1024] = {0};
@@ -198,7 +179,6 @@ int	main(int argc, char **argv)
                     {
                         if (errno == EAGAIN || errno == EWOULDBLOCK)
                         {
-                            std::cerr << "Socket Unblocked : " << std::endl;
                             continue;
                         }
                         std::cerr << "Error Reading : " << std::endl;
@@ -212,16 +192,9 @@ int	main(int argc, char **argv)
                         continue;
                     }
                     client_fds[client_fd].addToBuffer(buffer);
-
-
-
-                    // std::cout << "=====================================" << std::endl;
-                    std::cout << buffer << std::endl;
-                    // std::cout << "=====================================" << std::endl;
-    
+                    std::cout << "Server has read a request." << std::endl;
             }
             
-            // pos = client_fds[client_fd].getBuffer().find("\r\n\r\n");
             if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
             {
                     Request req(client_fds[client_fd].getBuffer());
@@ -242,17 +215,24 @@ int	main(int argc, char **argv)
                             {
                                 route = config.getRoutes().find("/")->second;
                             }
-                            
+                            std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN << "server : "
+                                << BOLDWHITE << "<< " << BOLDGREEN << "[method: " << req.getMethod() 
+                                << "] [target: " << req.getPath() << "] [server fd: " 
+                                << client_fds[client_fd].getServerFd() << "] [location: " << route.getRoot() << "]" << RESET << std::endl;
                             if (req.getMethod() == "GET" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
                             {
                                 response = handleGET(req, route, config);
                             }
                             else if (req.getMethod() == "POST" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
                             {
+                                
                                 response = handlePOST(req, route, config);
                             }
                             else if (req.getMethod() == "DELETE" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
+                            {
+                                
                                 response = handleDELETE(req, route, config);
+                            }   
                             else
                             {
                                 Response rep;
@@ -261,11 +241,12 @@ int	main(int argc, char **argv)
                             break;
                         }
                     }
-                    std::cout << std::endl << std::endl << "Response: \n"<< response << std::endl;
                     if (send(client_fd, response.c_str(), response.length(), 0) != static_cast<long int>(response.length()))
                     {
-                        std::cerr << "Error Sending : " << std::endl;
+                        std::cerr << "Error Sending" << std::endl;
                     }
+                    // std::cout << "Response: \n" << response << std::endl;
+                    // std::cout << "[" << getDate() << "] Server : >> [status] Request successfuly send." << std::endl << std::endl << std::endl;
                     client_fds.erase(client_fd);
                     if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
                     {

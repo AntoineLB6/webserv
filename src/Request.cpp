@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:57:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/12 21:55:55 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,13 +65,15 @@ std::string Request::getBody(void) const
 	return (getHeaders()["Body"]);
 }
 
-std::string Request::getContentType(void) const
+std::string Request::getContentType(ServerConfig config) const
 {
 	std::map<std::string, std::string>::iterator it;
 	std::map<std::string, std::string> map = getHeaders();
+	(void)config;
 
 	it = map.find("Content-Type");
-	if (it != map.end() && !it->second.empty() && map["Path"].find("cgi-bin") == std::string::npos)
+	std::string tempPath = getPath().substr(0, getPath().find_last_of("/") + 1);
+	if (it != map.end() && !it->second.empty())
 	{
 		return (map["Content-Type"]);
 	}

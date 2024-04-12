@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   config.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/04/13 01:18:06 by lmoheyma          #+#    #+#             */
+/*   Updated: 2024/04/13 01:18:08 by lmoheyma         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../inc/main.hpp"
 
 void getConfig(std::string path, std::vector<ServerConfig> &server_configs)
@@ -38,7 +50,6 @@ void getConfig(std::string path, std::vector<ServerConfig> &server_configs)
                 config.clear();
             }
             trigger++;
-			std::cout << "Configuration: " << currentConfig << std::endl;
 		}
 		else if (line.find('}') != std::string::npos)
 		{
@@ -79,7 +90,6 @@ void getConfig(std::string path, std::vector<ServerConfig> &server_configs)
 			std::vector<std::string> tokens = split(line, ' ');
 			if (tokens.size() == 2 && tokens[0] != "limit_except" && tokens[0] != "return")
             {
-				std::cout << "Argument: " << tokens[0] << ", Valeur: " << tokens[1] << std::endl;
                 put_setting(tokens[0], tokens[1], currentConfig, config);
             }
             else if (tokens.size() == 3 && tokens[0] == "return")

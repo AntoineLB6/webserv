@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:59:26 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 01:00:00 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void Response::setStatus(RouteConfig route)
 	}
 }
 
-void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route)
+void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route, ServerConfig config)
 {
 	this->_root = route.getRoot();
 	this->setStatus(route);
@@ -70,23 +70,27 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConf
 	if (req.getMethod() == "DELETE")
 	{
 		this->getDeleteRes(flag);
+		setDate();
 		return ;
 	}
 	if (this->_is_autoindex)
 	{
 		this->openListTree();
+		setDate();
 		return ;
 	}
 	if (this->_is_dir)
 	{
 		this->openDirectory(route);
+		setDate();
 		return ;
 	}
 	setVersion(req.getVersion());
-	int temp = req.getContentType().substr(0, req.getContentType().find(";")).compare("multipart/form-data");
-	if (req.getPath().find("cgi-bin") == std::string::npos && _statusCode == 200 && temp)
+	int temp = req.getContentType(config).substr(0, req.getContentType(config).find(";")).compare("multipart/form-data");
+	
+	if (req.getPath().find(".php") == std::string::npos && _statusCode == 200 && temp)
 	{
-		setContentType(req.getContentType());
+		setContentType(req.getContentType(config));
 	}
 	else
 		setContentType("text/html");
@@ -103,7 +107,7 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConf
 	setDate();
 	setServer("webserv");
 	setConnection("Keep-Alive", req);
-	if (req.getPath().find("cgi-bin") == std::string::npos)
+	if (req.getPath().find(".php") == std::string::npos)
 		setBody(getStatusCode(), _path);
 }
 
@@ -121,6 +125,7 @@ void Response::setContentType(std::string contentType)
 
 void Response::setContentLength(std::string contentLength)
 {
+	this->_contentLength = contentLength;
 	this->_response += "Content-Length: " + contentLength + "\n";
 }
 
@@ -134,6 +139,7 @@ void Response::setDate(void)
 	strftime(buffer, sizeof(buffer), "%a, %d %b %y, %H:%M:%S %Z", &tstruct);
 	std::stringstream ss;
 	ss << buffer;
+	_date = ss.str();
 	_response += "Date: " + ss.str() + "\n";
 }
 
@@ -144,7 +150,7 @@ void Response::setServer(std::string serverName)
 
 void Response::setConnection(std::string connection, Request &req)
 {
-	if (req.getPath().find("cgi-bin") == std::string::npos)
+	if (req.getPath().find(".php") == std::string::npos)
 		this->_response += "Connection: " + connection + "\r\n\r\n";
 	else
 		this->_response += "Connection: " + connection + "\n";
@@ -180,9 +186,24 @@ std::string Response::getStatusCode(void) const
 	return (ss.str());
 }
 
+std::string Response::getDate(void) const
+{
+	return (_date);
+}
+
 std::map<int, std::string> Response::getErrorsPages(void) const
 {
 	return (_errors_pages);
+}
+
+std::string Response::getTreeLength(void) const
+{
+	return (_treeLength);
+}
+
+std::string Response::getContentLength(void) const
+{
+	return (_contentLength);
 }
 
 void Response::openListTree()
@@ -191,12 +212,15 @@ void Response::openListTree()
 	std::string str = index.generateAutoIndexHTML(this->_path);
 	std::stringstream ss;
 	ss << str.length();
+	this->_treeLength = ss.str();
+	setStatusCode(200);
 	this->_response += "HTTP/1.1 200 " + this->_errors_pages.find(200)->second + "\nContent-Length: " + ss.str() + "\nContent-Type: text/html\r\n\r\n";
 	this->_response += str;
 }
 
 void Response::openDirectory(RouteConfig route)
 {
+	setStatusCode(301);
 	this->_response += "HTTP/1.1 301 " + this->_errors_pages.find(301)->second + "\nLocation: ./" + route.getDefaultPage() + "\nContent-Length: 0\nConnection: close\n\n";
 }
 
@@ -210,26 +234,22 @@ void Response::getDeleteRes(int flag)
 	{
 	case 200:
 	{
-		// loc = "success-delete.html";
 		msg = "La ressource a été supprimée avec succès.";
 		break;
 	}
 	case 403:
 	{
-		// loc = "forbidden-delete.html";
 		msg = "Vous n'êtes pas autorisé à supprimer cette ressource.";
 		break;
 	}
 	case 404:
 	{
-		// loc = "nf-delete.html";
 		msg = "La ressource demandée n'a pas été trouvée sur le serveur.";
 		break;
 	}
 	default:
 		break;
 	}
-	// this->_response += "HTTP/1.1 " + ss.str() + " " + this->_errors_pages.find(flag)->second + "\nLocation: pages/" + loc + "\nContent-Type: text/plain\nConnection: close\n\n" + msg;
 	this->_response += "HTTP/1.1 " + ss.str() + " " + this->_errors_pages.find(flag)->second + "\nContent-Type: text/plain\nConnection: close\n\n" + msg + "\n\n";
 }
 
@@ -265,16 +285,7 @@ void Response::checkOpenFile(std::string path, Request &req, RouteConfig route)
 			this->_is_dir = true;
 		return ;
 	}
-	if (path.find("pages/cgi-bin") != std::string::npos)
-	{
-		path.erase(0, path.find("pages/cgi-bin"));
-		page.open((path).c_str());
-		this->_path = path;
-	}
-	else
-	{
-		page.open((path).c_str());
-	}
+	page.open((path).c_str());
 	if (path.find(".") == std::string::npos && req.getMethod() == "GET")
 	{
 		setStatusCode(415);
@@ -321,11 +332,12 @@ std::string Response::readFile(std::string code, std::string path)
 	return (body);
 }
 
-std::string Response::handleCGI(Request &req, RouteConfig route)
+std::string Response::handleCGI(Request &req, RouteConfig route, ServerConfig config)
 {
+	CGIHandler cgi;
 	std::string path = route.getRoot() + req.getPath();
-	_cgi.setCgiEnv(req, path);
-	return (_cgi.execute(req));
+	cgi.setCgiEnv(req, path, config);
+	return (cgi.execute(req));
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)

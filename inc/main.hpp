@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.hpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 01:30:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:48:46 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/12 23:53:39 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,12 +31,19 @@
 #include <fcntl.h>
 #include <sstream>
 #include <fstream>
+#include "Colors.hpp"
 #include "Socket.hpp"
 #include "Response.hpp"
 #include "AutoIndex.hpp"
 #include "RouteConfig.hpp"
 #include "ServerConfig.hpp"
 #include "WebServ.hpp"
+#include "CGIHandler.hpp"
+#include "Request.hpp"
+#include "utils.hpp"
+
+class WebServ;
+class ServerConfig;
 
 void freeAll(std::vector<WebServ *> servers);
 std::string trim(const std::string& str);

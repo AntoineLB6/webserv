@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServ.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/01 16:02:51 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:50:20 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/13 01:00:34 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,15 @@
 #include <map>
 #include <algorithm>
 #include <fcntl.h>
-#include "Socket.hpp"
-#include "Response.hpp"
 #include "main.hpp"
-#include "ServerConfig.hpp"
 
 #define PORT 8080
 #define TIMEOUT 10000
 
 class Socket;
 class Response;
+class ServerConfig;
+class Request;
 
 class WebServ
 {
@@ -74,8 +73,8 @@ class WebServ
 std::string handleGET(Request &req, RouteConfig route, ServerConfig config);
 std::string handlePOST(Request &req, RouteConfig route, ServerConfig config);
 std::string handleDELETE(Request &req, RouteConfig route, ServerConfig config);
-std::string handleForm(Request &req);
 std::string handleFileUploads(Request &req , RouteConfig route, ServerConfig config, Response &response);
-std::string handleCGI(Request &req, Response &response, RouteConfig route);
-std::string readFile(std::string code);
+std::string handleCGI(Request &req, Response &response, RouteConfig route, ServerConfig config);
 std::string getErrorsPages(std::string code, RouteConfig route, ServerConfig config, Response &response);
+std::string contentLength(Response &response);
+std::string getDisplayDate(void);

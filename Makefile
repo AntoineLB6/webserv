@@ -11,7 +11,8 @@ SRCS =  src/main.cpp \
 		src/WebServ.cpp \
 		src/Request.cpp \
 		src/AutoIndex.cpp \
-		src/CGIHandler.cpp
+		src/CGIHandler.cpp \
+		src/utils.cpp
 
 INCLUDE = -I inc/
 

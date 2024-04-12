@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: aleite-b <aleite-b@student.42.fr>          +#+  +:+       +#+        */
+/*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 15:49:01 by aleite-b         ###   ########.fr       */
+/*   Updated: 2024/04/13 00:57:46 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,27 +17,28 @@
 #include <cstring>
 #include <map>
 #include <sstream>
-#include <unistd.h>
-#include "CGIHandler.hpp"
-#include "Request.hpp"
-#include "AutoIndex.hpp"
 #include <sys/stat.h>
+#include <unistd.h>
+#include "main.hpp"
 
-class CGIHandler;
 class AutoIndex;
-class ServerConfig;
 class RouteConfig;
+class ServerConfig;
+class Request;
+class CGIHandler;
 
 class Response
 {
 	private:
-		CGIHandler _cgi;
 		size_t i;
 		std::string _method;
 		std::string _path;
 		std::string _response;
 		std::string _connection;
 		std::string _contentType;
+		std::string _date;
+		std::string _treeLength;
+		std::string _contentLength;
 		std::map<std::string, std::string> _header;
 		size_t _statusCode;
 		int cgiFd[2];
@@ -58,19 +59,22 @@ class Response
 		void setContentType(std::string contentType);
 		void setContentLength(std::string contentLength);
 		void setStatus(RouteConfig route);
-		void setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route);
+		void setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route, ServerConfig config);
 		void setStatusCode(int statusCode);
 		void setDate(void);
 		void setServer(std::string serverName);
 		void setConnection(std::string connection, Request &req);
 		void setBody(std::string code, std::string path);
-		std::string handleCGI(Request &req, RouteConfig route);
+		std::string handleCGI(Request &req, RouteConfig route, ServerConfig config);
 		void setErrorsPages(void);
 
 		// Getters
 		std::string getResponse(void) const ;
 		std::string getStatusCode(void) const ;
 		std::map<int, std::string> getErrorsPages(void) const ;
+		std::string getDate(void) const ;
+		std::string getContentLength(void) const ;
+		std::string getTreeLength(void) const ;
 
 		// Response
 		void checkOpenFile(std::string path, Request &req, RouteConfig route) ;

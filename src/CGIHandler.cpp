@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 01:02:31 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/12 21:53:40 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,10 @@ void CGIHandler::setCgiPath(std::string path)
 	this->_cgiPath = path;
 }
 
-void CGIHandler::setCgiEnv(Request &req, std::string path)
+void CGIHandler::setCgiEnv(Request &req, std::string path, ServerConfig config)
 {
 	this->_envMap["CONTENT_LENGTH"] = req.getContentLength();
-	this->_envMap["CONTENT_TYPE"] = req.getContentType();
-	// this->_envMap["CONTENT_TYPE"] = "application/x-www-form-urlencoded;charset=utf-8";
+	this->_envMap["CONTENT_TYPE"] = req.getContentType(config);
 	this->_envMap["GATEWAY_INTERFACE"] = "CGI/1.1";
 	this->_envMap["QUERY_STRING"] = req.getBody();
 	this->_envMap["SCRIPT_FILENAME"] = path;
@@ -70,7 +69,7 @@ void CGIHandler::setCgiEnv(Request &req, std::string path)
 		return ;
 	_argv[0] = (char *)strdup("/usr/bin/php-cgi");
 	_argv[1] = NULL;
-	printEnv();
+	// printEnv();
 }
 
 std::string CGIHandler::execute(Request &req)
