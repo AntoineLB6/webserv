@@ -7,11 +7,12 @@ SRCS =  src/main.cpp \
 		src/ServerConfig.cpp \
 		src/RouteConfig.cpp \
 		src/Response.cpp \
-		srcHƒ¹/Socket.cpp \
+		sHÈ6rc/Socket.cpp \
 		src/WebServ.cpp \
 		src/Request.cpp \
 		src/AutoIndex.cpp \
-		src/CGIHandler.cpp
+		src/CGIHandler.cpp \
+		src/utils.cpp
 
 INCLUDE = -I inc/
 

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/12 21:55:55 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 15:50:54 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -219,11 +219,14 @@ void Request::fillHeaders(void)
 					size_t k = _request.find("filename=", j) + 10;
 					_filename = _request.substr(k, _request.find_first_of("\"", k) - k);
 					if (_filename.empty())
-					{
 						break;
-					}
 					k = _request.find_first_of("\"", k) + 3;
 					k += _request.find('\r', k) + 4 - k;
+					if (_request[k] == '\r')
+					{
+						_headers["Body"] = "";
+						break;
+					}
 					_headers["Body"] = _request.substr(k, _request.find('\r', k) - k - 1);
 				}
 				else

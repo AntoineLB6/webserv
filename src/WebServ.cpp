@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 01:00:28 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 15:51:06 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,8 @@ void WebServ::create_server()
 		freeAll(this->servers);
         exit(EXIT_FAILURE);
 	}
-    
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN
+            << "server : starting " << RESET << std::endl;
     const int enable = 1;
     if (setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
 	{
@@ -114,7 +115,8 @@ int WebServ::create_client()
         freeAll(this->servers);
         exit(EXIT_FAILURE);
     }
-
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN 
+            << "server : new connection on port " << config.getPort() << RESET << std::endl;
     if (fcntl(client_fd, F_SETFL, O_NONBLOCK) == -1) {
         std::cerr << "Error Setting Socket Flags client : " << std::strerror(errno) << std::endl;
         freeAll(this->servers);
@@ -275,7 +277,8 @@ std::string handleFileUploads(Request &req, RouteConfig route, ServerConfig conf
     }
     if (outfile.is_open())
     {
-        outfile << req.getBody();
+        if (!req.getBody().empty())
+            outfile << req.getBody();
         outfile.close();
     }
     else

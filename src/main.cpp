@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 01:15:06 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 15:51:33 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,52 +42,15 @@ int	main(int argc, char **argv)
         std::cerr << "Too much args" << std::endl;
         exit(EXIT_FAILURE);
     }
-
+    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDMAGENTA 
+            << "# configuration file " << path << RESET << std::endl;
     std::vector<ServerConfig> server_configs;
-    
     getConfig(path, server_configs);
-    int i = 1;
     for (std::vector<ServerConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
     {
         ServerConfig config = *it;
-        std::cout << "================================" << std::endl;
-        std::cout << "Server Config " << i << std::endl;
-
-        std::cout << "Port : " << config.getPort() << std::endl;
-        std::cout << "Server Name : " << config.getServerName() << std::endl;
-
-        std::cout << "Errors pages : ";
-        for (std::map<int, std::string>::iterator it = config.getErrorsPages().begin(); it != config.getErrorsPages().end(); ++it)
-        {
-            std::cout << it->first << " " << it->second << " | ";
-        }
-        std::cout << std::endl;
-        
-        for (std::map<std::string, RouteConfig>::iterator it = config.getRoutes().begin(); it != config.getRoutes().end(); it++)
-        {
-            RouteConfig route = it->second;
-            std::cout << "Routes : " << it->first << std::endl;
-            std::cout << "Returned Codes : ";
-            for (std::map<int, std::string>::iterator it = route.getReturnCodes().begin(); it != route.getReturnCodes().end(); ++it)
-            {
-                std::cout << it->first << " " << it->second << " | ";
-            }
-            std::cout << std::endl;
-            std::cout << "Root : " << route.getRoot() << std::endl;
-            std::cout << "Autoindex : " << route.getAutoindex() << std::endl;
-            std::cout << "Default Page : " << route.getDefaultPage() << std::endl;
-            std::cout << "Client body install repo : " << route.getClientBodyTempPath() << std::endl;
-            std::cout << "Max body size : " << route.getClientMaxBodySize() << std::endl;
-            std::cout << "Allowed Methods : ";
-            for (std::vector<std::string>::iterator it = route.getLimitExceptAccepted().begin(); it != route.getLimitExceptAccepted().end(); it++)
-            {
-                std::cout << *it << " ";
-            }
-            std::cout << std::endl;
-        }
-        i++;
-        std::cout << "================================" << std::endl;
-        std::cout << std::endl;
+        std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN 
+            << "listening on port " << config.getPort() << RESET << std::endl;
     }
 
     for (std::vector<ServerConfig>::iterator it = server_configs.begin(); it != server_configs.end(); it++)
@@ -192,7 +155,6 @@ int	main(int argc, char **argv)
                         continue;
                     }
                     client_fds[client_fd].addToBuffer(buffer);
-                    std::cout << "Server has read a request." << std::endl;
             }
             
             if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
@@ -253,6 +215,8 @@ int	main(int argc, char **argv)
                         std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
                         exit(EXIT_FAILURE);
                     }
+                    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN
+                            << "server : connection closed " << RESET << std::endl;
                     close(client_fd);
             }
         }
