@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:28 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 00:57:46 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:49:27 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ class Response
 		void setContentLength(std::string contentLength);
 		void setStatus(RouteConfig route);
 		void setHeaders(Request &req, int flag, std::string cgiBody, RouteConfig route, ServerConfig config);
+		void NewFunction(Request &req, ServerConfig &config, int flag, std::string &cgiBody);
 		void setStatusCode(int statusCode);
 		void setDate(void);
 		void setServer(std::string serverName);

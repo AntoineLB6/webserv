@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/09 01:30:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/12 23:53:39 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:40:02 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@
 #include "WebServ.hpp"
 #include "CGIHandler.hpp"
 #include "Request.hpp"
-#include "utils.hpp"
 
 class WebServ;
 class ServerConfig;

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/29 13:54:08 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 15:50:54 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:52:36 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,9 +74,7 @@ std::string Request::getContentType(ServerConfig config) const
 	it = map.find("Content-Type");
 	std::string tempPath = getPath().substr(0, getPath().find_last_of("/") + 1);
 	if (it != map.end() && !it->second.empty())
-	{
 		return (map["Content-Type"]);
-	}
 	return (_contentType);
 }
 

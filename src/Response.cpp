@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 19:39:59 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:51:38 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,11 +87,10 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConf
 	}
 	setVersion(req.getVersion());
 	int temp = req.getContentType(config).substr(0, req.getContentType(config).find(";")).compare("multipart/form-data");
-	
+	if (req.getContentType(config).find(";") == std::string::npos)
+		temp = 0;
 	if (req.getPath().find(".php") == std::string::npos && _statusCode == 200 && temp)
-	{
 		setContentType(req.getContentType(config));
-	}
 	else
 		setContentType("text/html");
 	std::stringstream ss;
