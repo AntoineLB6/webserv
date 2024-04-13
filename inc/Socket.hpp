@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 15:38:16 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 16:30:26 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 16:28:53 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ class Socket
 	private:
 		const int fd;
 		const int server_fd;
-		std::string buffer;
+		std::vector<char> bufferVector;
 		clock_t time;
 
 	public:
@@ -34,7 +34,7 @@ class Socket
 		int getFd() const;
 		int getServerFd() const;
 		int getBufferSize() const;
-		std::string getBuffer() const;
+		std::vector<char> getBufferVector(void) const ;
 		clock_t getTime() const;
-		void addToBuffer(char *bufferToAdd);
+		void addToBuffer(char *bufferToAdd, size_t size);
 };

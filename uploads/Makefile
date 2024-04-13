@@ -7,7 +7,7 @@ SRCS =  src/main.cpp \
 		src/ServerConfig.cpp \
 		src/RouteConfig.cpp \
 		src/Response.cpp \
-		sHÈ6rc/Socket.cpp \
+		src/Socket.cpp \
 		src/WebServ.cpp \
 		src/Request.cpp \
 		src/AutoIndex.cpp \

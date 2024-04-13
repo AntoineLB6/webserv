@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 15:51:33 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 17:48:48 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,70 +154,71 @@ int	main(int argc, char **argv)
                         close(client_fd);
                         continue;
                     }
-                    client_fds[client_fd].addToBuffer(buffer);
+                    client_fds[client_fd].addToBuffer(buffer, valread);
             }
-            
             if (!(events[i].events & EPOLLIN) && (events[i].events & EPOLLOUT) && valread > 0)
             {
-                    Request req(client_fds[client_fd].getBuffer());
-                    std::string response;
-                    for (it = servers.begin(); it != servers.end(); it++)
+                std::vector<char> temp = client_fds[client_fd].getBufferVector();
+                std::string str(temp.begin(), temp.end());
+                Request req(str);
+                std::string response;
+                for (it = servers.begin(); it != servers.end(); it++)
+                {
+                    WebServ* server = *it;
+                    if (client_fds[client_fd].getServerFd() == server->getServerFd())
                     {
-                        WebServ* server = *it;
-                        if (client_fds[client_fd].getServerFd() == server->getServerFd())
+                        ServerConfig config = server->getConfig();
+                        RouteConfig route;
+                        
+                        if (config.getRoutes().find(req.getPath()) != config.getRoutes().end())
                         {
-                            ServerConfig config = server->getConfig();
-                            RouteConfig route;
-                            
-                            if (config.getRoutes().find(req.getPath()) != config.getRoutes().end())
-                            {
-                                route = config.getRoutes().find(req.getPath())->second;
-                            }
-                            else
-                            {
-                                route = config.getRoutes().find("/")->second;
-                            }
-                            std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN << "server : "
-                                << BOLDWHITE << "<< " << BOLDGREEN << "[method: " << req.getMethod() 
-                                << "] [target: " << req.getPath() << "] [server fd: " 
-                                << client_fds[client_fd].getServerFd() << "] [location: " << route.getRoot() << "]" << RESET << std::endl;
-                            if (req.getMethod() == "GET" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                            {
-                                response = handleGET(req, route, config);
-                            }
-                            else if (req.getMethod() == "POST" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                            {
-                                
-                                response = handlePOST(req, route, config);
-                            }
-                            else if (req.getMethod() == "DELETE" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                            {
-                                
-                                response = handleDELETE(req, route, config);
-                            }   
-                            else
-                            {
-                                Response rep;
-                                response = getErrorsPages("501", route, config, rep);
-                            }
-                            break;
+                            route = config.getRoutes().find(req.getPath())->second;
                         }
+                        else
+                        {
+                            route = config.getRoutes().find("/")->second;
+                        }
+                        std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN << "server : "
+                            << BOLDWHITE << "<< " << BOLDGREEN << "[method: " << req.getMethod() 
+                            << "] [target: " << req.getPath() << "] [server fd: " 
+                            << client_fds[client_fd].getServerFd() << "] [location: " << route.getRoot() << "]" << RESET << std::endl;
+                        if (req.getMethod() == "GET" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
+                        {
+                            response = handleGET(req, route, config);
+                        }
+                        else if (req.getMethod() == "POST" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
+                        {
+                            
+                            response = handlePOST(req, route, config);
+                        }
+                        else if (req.getMethod() == "DELETE" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
+                        {
+                            
+                            response = handleDELETE(req, route, config);
+                        }   
+                        else
+                        {
+                            Response rep;
+                            response = getErrorsPages("501", route, config, rep);
+                        }
+                        break;
                     }
-                    if (send(client_fd, response.c_str(), response.length(), 0) != static_cast<long int>(response.length()))
-                    {
-                        std::cerr << "Error Sending" << std::endl;
-                    }
-                    // std::cout << "Response: \n" << response << std::endl;
-                    // std::cout << "[" << getDate() << "] Server : >> [status] Request successfuly send." << std::endl << std::endl << std::endl;
-                    client_fds.erase(client_fd);
-                    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
-                    {
-                        std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
-                        exit(EXIT_FAILURE);
-                    }
-                    std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN
-                            << "server : connection closed " << RESET << std::endl;
-                    close(client_fd);
+                }
+                if (send(client_fd, response.c_str(), response.length(), 0) != static_cast<long int>(response.length()))
+                {
+                    std::cerr << "Error Sending" << std::endl;
+                }
+                // std::cout << "Response: \n" << response << std::endl;
+                // std::cout << "[" << getDate() << "] Server : >> [status] Request successfuly send." << std::endl << std::endl << std::endl;
+                client_fds.erase(client_fd);
+                if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
+                {
+                    std::cerr << "Error Deleting EPOLL : " << std::strerror(errno) << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+                std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN
+                        << "server : connection closed " << RESET << std::endl;
+                close(client_fd);
             }
         }
     }
