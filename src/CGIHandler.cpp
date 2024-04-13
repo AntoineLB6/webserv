@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 19:38:54 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 21:09:17 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,9 @@ std::string CGIHandler::execute(Request &req, std::string path)
 		close(fdin[1]);
 		close(fdin[0]);
 		execve(path.c_str(), temp, _env);
+		std::cerr << BOLDRED;
 		perror("Execve: ");
+		std::cerr << RESET;
 		exit(EXIT_FAILURE);
 	}
 	else
@@ -120,7 +122,5 @@ void CGIHandler::printEnv(void)
 	int i = 0;
 	
 	while (_env[i])
-	{
 		std::cout << _env[i++] << std::endl;
-	}
 }

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 20:34:04 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 21:07:25 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,7 +150,11 @@ std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
         if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        {
             cgiBody = handleCGI(req, response, route, config);
+            if (cgiBody.empty())
+                return (getErrorsPages("501", route, config, response));
+        }
         else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
             return (getErrorsPages("501", route, config, response));
     }
@@ -182,7 +186,11 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
     if (req.getPath() != "/")
     {
         if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        {
             cgiBody = handleCGI(req, response, route, config);
+            if (cgiBody.empty())
+                return (getErrorsPages("501", route, config, response));
+        }
         else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
             return (getErrorsPages("501", route, config, response));
     }
@@ -276,12 +284,6 @@ std::string handleFileUploads(Request &req, RouteConfig route, ServerConfig conf
 std::string handleCGI(Request &req, Response &response, RouteConfig route, ServerConfig config)
 {
     std::string body = response.handleCGI(req, route, config);
-    
-    if (body.empty())
-    {
-        std::cerr << "Error exec CGI" << std::endl;
-        return (NULL);
-    }
     return (body);
 }
 
