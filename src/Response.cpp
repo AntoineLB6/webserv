@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 01:00:00 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 19:39:59 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -337,7 +337,7 @@ std::string Response::handleCGI(Request &req, RouteConfig route, ServerConfig co
 	CGIHandler cgi;
 	std::string path = route.getRoot() + req.getPath();
 	cgi.setCgiEnv(req, path, config);
-	return (cgi.execute(req));
+	return (cgi.execute(req, path));
 }
 
 std::ostream& operator<<(std::ostream &os, Response const &f)

@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 17:48:48 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:32:05 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,10 +125,11 @@ int	main(int argc, char **argv)
             for (it = servers.begin(); it != servers.end(); it++)
             {
                 WebServ* server = *it;
-                if (events[i].data.fd == server->getServerFd()) {
+                int server_fd = server->getServerFd();
+                if (events[i].data.fd == server_fd) {
                     server->setEpollFd(epoll_fd);
                     client_fd = server->create_client();
-                    client_fds.insert(std::make_pair(client_fd, Socket(client_fd, server->getServerFd())));
+                    client_fds.insert(std::make_pair(client_fd, Socket(client_fd, server_fd)));
                     break;
                 }
             }
@@ -171,31 +172,19 @@ int	main(int argc, char **argv)
                         RouteConfig route;
                         
                         if (config.getRoutes().find(req.getPath()) != config.getRoutes().end())
-                        {
                             route = config.getRoutes().find(req.getPath())->second;
-                        }
                         else
-                        {
                             route = config.getRoutes().find("/")->second;
-                        }
                         std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDGREEN << "server : "
                             << BOLDWHITE << "<< " << BOLDGREEN << "[method: " << req.getMethod() 
                             << "] [target: " << req.getPath() << "] [server fd: " 
                             << client_fds[client_fd].getServerFd() << "] [location: " << route.getRoot() << "]" << RESET << std::endl;
                         if (req.getMethod() == "GET" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                        {
                             response = handleGET(req, route, config);
-                        }
                         else if (req.getMethod() == "POST" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                        {
-                            
                             response = handlePOST(req, route, config);
-                        }
                         else if (req.getMethod() == "DELETE" && (std::find(route.getLimitExceptAccepted().begin(), route.getLimitExceptAccepted().end(), req.getMethod()) != route.getLimitExceptAccepted().end()))
-                        {
-                            
                             response = handleDELETE(req, route, config);
-                        }   
                         else
                         {
                             Response rep;
@@ -208,8 +197,6 @@ int	main(int argc, char **argv)
                 {
                     std::cerr << "Error Sending" << std::endl;
                 }
-                // std::cout << "Response: \n" << response << std::endl;
-                // std::cout << "[" << getDate() << "] Server : >> [status] Request successfuly send." << std::endl << std::endl << std::endl;
                 client_fds.erase(client_fd);
                 if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, client_fd, NULL) < 0)
                 {

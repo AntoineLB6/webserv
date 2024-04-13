@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/12 21:53:40 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 19:38:54 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,19 +64,15 @@ void CGIHandler::setCgiEnv(Request &req, std::string path, ServerConfig config)
 		_env[i] = strdup(tmp.c_str());
 		i++;
 	}
-	_argv = (char **)calloc(sizeof(char *), 2);
-	if (!_argv)
-		return ;
-	_argv[0] = (char *)strdup("/usr/bin/php-cgi");
-	_argv[1] = NULL;
 	// printEnv();
 }
 
-std::string CGIHandler::execute(Request &req)
+std::string CGIHandler::execute(Request &req, std::string path)
 {
 	std::string responseBody;
 	int fdout[2];
 	int fdin[2];
+	char* const *temp = NULL;
 	int status;
 	
 	if (pipe(fdin) == -1)
@@ -96,7 +92,7 @@ std::string CGIHandler::execute(Request &req)
 			return (NULL);
 		close(fdin[1]);
 		close(fdin[0]);
-		execve(_argv[0], _argv, _env);
+		execve(path.c_str(), temp, _env);
 		perror("Execve: ");
 		exit(EXIT_FAILURE);
 	}

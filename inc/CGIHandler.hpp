@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:07:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/10 16:39:31 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 19:39:24 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,13 +31,12 @@ class CGIHandler
 		char **_env;
 		std::map<std::string, std::string> _envMap;
 		std::string _cgiPath;
-		char **_argv;
 	public:
 		CGIHandler();
 		CGIHandler(const CGIHandler &other);
 		CGIHandler& operator=(const CGIHandler &other);
 		~CGIHandler();
-		std::string execute(Request &req);
+		std::string execute(Request &req, std::string path);
 		void setCgiEnv(Request &req, std::string path, ServerConfig config);
 		void setCgiPath(std::string path);
 		void printEnv(void) ;

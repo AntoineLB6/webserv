@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 15:51:06 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/13 20:34:04 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,9 +152,7 @@ std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
         if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
             cgiBody = handleCGI(req, response, route, config);
         else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
-        {
             return (getErrorsPages("501", route, config, response));
-        }
     }
     if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
         response.setHeaders(req, 1, cgiBody, route, config);
@@ -176,29 +174,22 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
     Response response(config);
     std::string cgiBody = "";
     std::string rep;
-    std::string tempPath;
+    std::string tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
     
     response.setStatus(route);
 	if (static_cast<long>(req.getBody().size()) > route.getClientMaxBodySize())
 		return (getErrorsPages("413", route, config, response));
     if (req.getPath() != "/")
     {
-        tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
         if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
-        {
             cgiBody = handleCGI(req, response, route, config);
-        }
         else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
-        {
             return (getErrorsPages("501", route, config, response));
-        }
     }
     if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
         response.setHeaders(req, 1, cgiBody, route, config);
     else
-    {
         response.setHeaders(req, 0, cgiBody, route, config);
-    }
     if (!cgiBody.empty())
         rep = response.getResponse() + cgiBody;
     else
@@ -224,11 +215,12 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
 bool isDirectory(const std::string& path)
 {
 	struct stat info;
-	if (stat(path.c_str(), &info) != 0) {
+	if (stat(path.c_str(), &info) != 0)
+    {
         if (!path.empty() && path[path.size() - 1] == '/')
-		{
+        {
         	return true;
-    	}
+        }
 		return false;
 	}
 	return S_ISDIR(info.st_mode);
@@ -240,23 +232,16 @@ std::string handleDELETE(Request &req, RouteConfig route, ServerConfig config)
     std::string cgiBody = "";
 
 	if (static_cast<long>(req.getBody().size()) > route.getClientMaxBodySize())
-	{
 		return (getErrorsPages("413", route, config, response));
-	}
     std::string path = route.getRoot() + req.getPath();
     if (isDirectory(path))
-    {
         response.setHeaders(req, 403, cgiBody, route, config);
-    }
     else
     {
         if (std::remove(path.c_str()) != 0)
-        {
             response.setHeaders(req, 404, cgiBody, route, config);
-        } else
-        {
+        else
             response.setHeaders(req, 200, cgiBody, route, config);
-        }
     }
     std::cout << BOLDCYAN << "[" << getDisplayDate() << "] " << BOLDMAGENTA << "server : "
             << BOLDWHITE << ">> " << BOLDMAGENTA << "[status: " << response.getStatusCode() 
