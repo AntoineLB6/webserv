@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:07 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 21:07:25 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/14 16:45:41 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,11 @@ int WebServ::create_client()
     return client_fd;
 }
 
+int findCGIExtension(std::string path)
+{
+    return (path.find(".php") != std::string::npos || path.find(".py") != std::string::npos);
+}
+
 std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
 {
     Response response(config);
@@ -149,16 +154,16 @@ std::string handleGET(Request &req, RouteConfig route, ServerConfig config)
     if (req.getPath() != "/")
     {
         tempPath = req.getPath().substr(0, req.getPath().find_last_of("/") + 1);
-        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        if (config.getRoutes().find(tempPath) != config.getRoutes().end() && findCGIExtension(req.getPath()))
         {
             cgiBody = handleCGI(req, response, route, config);
             if (cgiBody.empty())
                 return (getErrorsPages("501", route, config, response));
         }
-        else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        else if (config.getRoutes().find(tempPath) == config.getRoutes().end() && findCGIExtension(req.getPath()))
             return (getErrorsPages("501", route, config, response));
     }
-    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+    if (config.getRoutes().find(tempPath) != config.getRoutes().end() && findCGIExtension(req.getPath()))
         response.setHeaders(req, 1, cgiBody, route, config);
     else
         response.setHeaders(req, 0, cgiBody, route, config);
@@ -185,16 +190,16 @@ std::string handlePOST(Request &req, RouteConfig route, ServerConfig config)
 		return (getErrorsPages("413", route, config, response));
     if (req.getPath() != "/")
     {
-        if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        if (config.getRoutes().find(tempPath) != config.getRoutes().end() && findCGIExtension(req.getPath()))
         {
             cgiBody = handleCGI(req, response, route, config);
             if (cgiBody.empty())
                 return (getErrorsPages("501", route, config, response));
         }
-        else if (config.getRoutes().find(tempPath + ".php") == config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+        else if (config.getRoutes().find(tempPath) == config.getRoutes().end() && findCGIExtension(req.getPath()))
             return (getErrorsPages("501", route, config, response));
     }
-    if (config.getRoutes().find(tempPath + ".php") != config.getRoutes().end() && req.getPath().find(".php") != std::string::npos)
+    if (config.getRoutes().find(tempPath) != config.getRoutes().end() && findCGIExtension(req.getPath()))
         response.setHeaders(req, 1, cgiBody, route, config);
     else
         response.setHeaders(req, 0, cgiBody, route, config);

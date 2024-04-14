@@ -2,6 +2,7 @@
 
 <html>
 <body>
+<h1>Form Data</h1>
 <h1><?php if(isset($_POST['fname']) && isset($_POST['lname'])): ?>
         <br/>
         <h1>Your first name is <?php echo $_POST["fname"]; ?>

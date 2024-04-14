@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 15:27:11 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 20:51:38 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/14 16:58:20 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConf
 	int temp = req.getContentType(config).substr(0, req.getContentType(config).find(";")).compare("multipart/form-data");
 	if (req.getContentType(config).find(";") == std::string::npos)
 		temp = 0;
-	if (req.getPath().find(".php") == std::string::npos && _statusCode == 200 && temp)
+	if ((req.getPath().find(".php") == std::string::npos && req.getPath().find(".py") == std::string::npos) && _statusCode == 200 && temp)
 		setContentType(req.getContentType(config));
 	else
 		setContentType("text/html");
@@ -106,7 +106,7 @@ void Response::setHeaders(Request &req, int flag, std::string cgiBody, RouteConf
 	setDate();
 	setServer("webserv");
 	setConnection("Keep-Alive", req);
-	if (req.getPath().find(".php") == std::string::npos)
+	if (req.getPath().find(".php") == std::string::npos && req.getPath().find(".py") == std::string::npos)
 		setBody(getStatusCode(), _path);
 }
 
@@ -149,7 +149,7 @@ void Response::setServer(std::string serverName)
 
 void Response::setConnection(std::string connection, Request &req)
 {
-	if (req.getPath().find(".php") == std::string::npos)
+	if (req.getPath().find(".php") == std::string::npos && req.getPath().find(".py") == std::string::npos)
 		this->_response += "Connection: " + connection + "\r\n\r\n";
 	else
 		this->_response += "Connection: " + connection + "\n";
