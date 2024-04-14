@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 15:06:41 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/13 21:09:17 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/14 22:01:22 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,8 @@ void CGIHandler::setCgiEnv(Request &req, std::string path, ServerConfig config)
 	this->_envMap["HTTP_ACCEPT_LANGUAGE"] = req.getHeaders()["Accept-Language"];
 	this->_envMap["HTTP_USER_AGENT"] = req.getHeaders()["User-Agent"];
 	this->_envMap["HTTP_REFERER"] = req.getHeaders()["Referer"];
+	if (!req.getHeaders()["Cookie"].empty())
+		this->_envMap["HTTP_COOKIE"] = req.getHeaders()["Cookie"];
 	this->_envMap["REDIRECT_STATUS"] = "200";
 	_env = (char **)calloc(sizeof(char *), _envMap.size() + 1);
 	if (!_env)
@@ -64,7 +66,7 @@ void CGIHandler::setCgiEnv(Request &req, std::string path, ServerConfig config)
 		_env[i] = strdup(tmp.c_str());
 		i++;
 	}
-	// printEnv();
+	printEnv();
 }
 
 std::string CGIHandler::execute(Request &req, std::string path)

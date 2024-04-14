@@ -6,7 +6,7 @@
 /*   By: lmoheyma <lmoheyma@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 17:38:19 by lmoheyma          #+#    #+#             */
-/*   Updated: 2024/04/14 17:28:27 by lmoheyma         ###   ########.fr       */
+/*   Updated: 2024/04/15 00:10:54 by lmoheyma         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,7 +161,6 @@ int	main(int argc, char **argv)
             {
                 std::vector<char> temp = client_fds[client_fd].getBufferVector();
                 std::string str(temp.begin(), temp.end());
-                std::cout << "Request: \n" << str << std::endl; 
                 Request req(str);
                 std::string response;
                 for (it = servers.begin(); it != servers.end(); it++)
